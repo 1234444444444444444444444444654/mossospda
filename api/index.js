@@ -69,7 +69,6 @@ const PLATES_MAP = {
 };
 
 let cachedClient = null;
-let cachedClient = null;
 
 async function getDb() {
   if (cachedClient) {
