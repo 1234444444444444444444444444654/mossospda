@@ -376,10 +376,91 @@ tbody td .mono{font-family:'IBM Plex Mono',monospace;color:var(--text)}
 
 /* Ajustar el contenido principal en móvil para que no quede bajo la barra */
 @media (max-width: 768px) {
-  .mobile-nav { display: flex; flex-direction: column; }
-  .main-content { padding-bottom: 80px !important; }
+  /* Ocultar sidebar, mostrar mobile nav */
   .sidebar { display: none !important; }
-  #screen-pda { flex-direction: column; }
+  .mobile-nav { display: flex !important; flex-direction: column; }
+
+  /* Layout principal */
+  #screen-pda { flex-direction: column !important; }
+  .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+    padding: 16px 14px 90px 14px !important;
+    min-height: 100vh;
+  }
+
+  /* Títulos de página */
+  .page-title { font-size: 20px; }
+  .page-sub { font-size: 11px; margin-bottom: 16px; }
+
+  /* Timer más compacto en móvil */
+  .timer-display { font-size: 38px; letter-spacing: 1px; }
+  .timer-sub { gap: 14px; }
+
+  /* Stats grid: 2 columnas en móvil */
+  .stats-grid { grid-template-columns: 1fr 1fr !important; gap: 10px; margin-bottom: 16px; }
+  .stat-card { padding: 14px 12px; }
+  .stat-card .s-value { font-size: 18px; }
+
+  /* Botones de servicio apilados */
+  .service-actions { flex-direction: column; gap: 8px; }
+  .btn-service { width: 100%; justify-content: center; padding: 12px 16px; }
+  .service-card { padding: 18px 16px; }
+
+  /* ID Card ocupa todo el ancho */
+  .id-card-wrap { flex-direction: column; gap: 16px; }
+  .id-card { width: 100% !important; }
+
+  /* ADMIN: tabs scrollables horizontalmente */
+  .tab-bar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 2px;
+    padding: 4px;
+  }
+  .tab-bar::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    flex-shrink: 0;
+    padding: 8px 12px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  /* Selects en admin ocupan todo el ancho */
+  .agent-select-row { flex-direction: column; align-items: stretch; }
+  .form-select { min-width: unset; width: 100%; }
+  .btn-secondary { width: 100%; text-align: center; }
+
+  /* Tablas: scroll horizontal */
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { min-width: 500px; }
+
+  /* Radio group en móvil */
+  .radio-group { flex-direction: column; gap: 8px; }
+
+  /* Rank grid: 2 columnas */
+  .rank-grid { grid-template-columns: 1fr 1fr !important; }
+
+  /* Modal: ocupa más pantalla */
+  .modal {
+    padding: 20px 16px;
+    border-radius: 12px;
+    max-height: 85vh;
+  }
+  .modal-actions { flex-direction: column-reverse; gap: 8px; }
+  .modal-actions button { width: 100% !important; justify-content: center; }
+
+  /* Toast arriba en móvil para no tapar la nav */
+  .toast-container { bottom: auto; top: 16px; right: 12px; left: 12px; }
+  .toast { max-width: 100%; }
+
+  /* Agentes lista admin más compacta */
+  #admin-agents-list > div { flex-wrap: wrap; gap: 10px; padding: 12px; }
+  #admin-agents-list > div > div:last-child { display: none; }
+
+  /* Mobile nav botón admin — añadir en JS */
 }
 </style>
 </head>
@@ -1036,6 +1117,17 @@ async function initPDA() {
   if (u.isSuperiorScale) {
     document.getElementById('admin-nav-section').style.display = 'block';
     loadAdminAgents();
+
+    // Botón Admin en mobile nav
+    const mobileNav = document.querySelector('.mobile-nav-items');
+    if (mobileNav && !document.getElementById('mnav-admin')) {
+      const adminBtn = document.createElement('button');
+      adminBtn.className = 'mobile-nav-item';
+      adminBtn.id = 'mnav-admin';
+      adminBtn.innerHTML = `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20" height="20"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Admin`;
+      adminBtn.onclick = () => { showPage('page-admin'); setMobileActive('mnav-admin'); };
+      mobileNav.appendChild(adminBtn);
+    }
   }
 
   // ID Card
