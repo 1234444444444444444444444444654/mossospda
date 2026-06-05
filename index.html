@@ -280,87 +280,106 @@ tbody td .mono{font-family:'IBM Plex Mono',monospace;color:var(--text)}
 .promotion-item{background:rgba(45,168,74,0.06);border:1px solid rgba(45,168,74,0.2);border-radius:8px;padding:14px 16px;margin-bottom:8px}
 .promotion-item.descenso{background:rgba(217,64,64,0.06);border-color:rgba(217,64,64,0.2)}
 /* RESPONSIVE - Bottom Navigation en Móvil */
-@media (max-width: 768px) {
-  .sidebar {
-    position: fixed;
-    top: auto;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    height: 68px;
-    flex-direction: row;
-    align-items: center;
-    border-right: none;
-    border-top: 1px solid var(--border2);
-    z-index: 100;
-    padding: 0 6px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
-    background: var(--navy2);
-  }
-
-  .sidebar-brand,
-  .sidebar-agent,
-  .sidebar-footer,
-  .nav-section {
-    display: none !important;
-  }
-
-  .sidebar-nav {
-    flex: 1;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    height: 100%;
-    gap: 4px;
-  }
-
-  .nav-item {
-    padding: 6px 10px;
-    flex-direction: column;
-    gap: 3px;
-    font-size: 10.5px;
-    min-width: 58px;
-    text-align: center;
-    border-radius: 8px;
-  }
-
-  .nav-item svg {
-    width: 24px;
-    height: 24px;
-  }
-
-  .nav-item.active {
-    background: rgba(74,158,255,0.15);
-    color: var(--accent);
-  }
-
-  .nav-item.active::before {
-    display: none;
-  }
-
-  .main-content {
-    margin-left: 0 !important;
-    padding: 20px 16px 85px !important;
-  }
-
-  .timer-display {
-    font-size: 42px;
-  }
-
-  .service-card {
-    padding: 22px;
-  }
+.mobile-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: var(--navy2);
+  border-top: 1px solid var(--border);
+  padding: 0;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* Desktop - Sidebar normal */
-@media (min-width: 769px) {
-  .sidebar {
-    transform: none !important;
-  }
+.mobile-nav-items {
+  display: flex;
+  align-items: stretch;
+}
+
+.mobile-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 4px 8px;
+  cursor: pointer;
+  color: var(--text3);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  gap: 4px;
+  transition: color 0.15s, background 0.15s;
+  position: relative;
+  font-family: 'Rajdhani', sans-serif;
+  border: none;
+  background: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-nav-item svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.mobile-nav-item.active {
+  color: var(--accent);
+}
+
+.mobile-nav-item.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 0 0 3px 3px;
+}
+
+.mobile-nav-item:active {
+  background: rgba(74,158,255,0.08);
+}
+
+/* Botón central especial (+ Registro) */
+.mobile-nav-item.mobile-center {
+  color: var(--navy);
+}
+
+.mobile-nav-item.mobile-center .mobile-center-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(74,158,255,0.45);
+  margin-bottom: 2px;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.mobile-nav-item.mobile-center:active .mobile-center-btn {
+  transform: scale(0.92);
+  box-shadow: 0 2px 8px rgba(74,158,255,0.3);
+}
+
+.mobile-nav-item.mobile-center .mobile-center-btn svg {
+  width: 22px;
+  height: 22px;
+  color: #fff;
+}
+
+/* Ajustar el contenido principal en móvil para que no quede bajo la barra */
+@media (max-width: 768px) {
+  .mobile-nav { display: flex; flex-direction: column; }
+  .main-content { padding-bottom: 80px !important; }
+  .sidebar { display: none !important; }
+  #screen-pda { flex-direction: column; }
 }
 </style>
 </head>
@@ -747,6 +766,33 @@ tbody td .mono{font-family:'IBM Plex Mono',monospace;color:var(--text)}
 
   </main>
 </div>
+  <!-- ══ MOBILE BOTTOM NAV ══ -->
+<nav class="mobile-nav" id="mobile-nav">
+  <div class="mobile-nav-items">
+    <button class="mobile-nav-item active" id="mnav-fichaje" onclick="showPage('page-fichaje'); setMobileActive('mnav-fichaje')">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Inicio
+    </button>
+    <button class="mobile-nav-item" id="mnav-activos" onclick="showPage('page-activos'); setMobileActive('mnav-activos')">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+      En Servicio
+    </button>
+    <button class="mobile-nav-item mobile-center" id="mnav-registro" onclick="openRegistroModal()">
+      <div class="mobile-center-btn">
+        <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+      Multas
+    </button>
+    <button class="mobile-nav-item" id="mnav-top" onclick="showPage('page-top'); setMobileActive('mnav-top')">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="18 20 18 10"/><polyline points="12 20 12 4"/><polyline points="6 20 6 14"/></svg>
+      Ranking
+    </button>
+    <button class="mobile-nav-item" id="mnav-id" onclick="showPage('page-id'); setMobileActive('mnav-id')">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      Perfil
+    </button>
+  </div>
+</nav>
 </div><!-- /app -->
 
 <!-- MODAL EDITAR SERVICIO -->
@@ -1767,22 +1813,28 @@ function toast(msg, type='info') {
   c.appendChild(el);
   setTimeout(() => el.remove(), 4000);
 }
-  // Inicializar Bottom Nav en móvil
-function initMobileNav() {
-  const sidebar = document.querySelector('.sidebar');
-  if (window.innerWidth <= 768) {
-    sidebar.classList.add('open');
-  }
+ // ── MOBILE NAV ──
+function setMobileActive(id) {
+  document.querySelectorAll('.mobile-nav-item:not(.mobile-center)').forEach(el => el.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
 }
 
-// Llamar dentro de initPDA()
-async function initPDA() {
-  showScreen('screen-pda');
-  showLoading(false);
-  // ... todo tu código actual ...
-
-  initMobileNav();   // ← Añade esta línea al final de la función
-}
+// Mostrar la mobile nav solo en pantalla PDA
+const _origShowScreen = showScreen;
+// Override showPage para sync con mobile nav
+const _navPageMap = {
+  'page-fichaje': 'mnav-fichaje',
+  'page-activos': 'mnav-activos',
+  'page-top':     'mnav-top',
+  'page-id':      'mnav-id',
+};
+const _origShowPage = showPage;
+window.showPage = function(id) {
+  _origShowPage(id);
+  const mnavId = _navPageMap[id];
+  if (mnavId) setMobileActive(mnavId);
+};
 </script>
 </body>
 </html>
