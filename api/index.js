@@ -7,19 +7,21 @@ const REQUIRED_ROLE = "1486761352017215600";
 const PLATES_CHANNEL_ID = "1487706683684950138";
 
 const RANK_ROLES = [
-  { id: "MAJOR_ROLE_ID", name: "Major", level: 10 },
-  { id: "INTENDENT_ROLE_ID", name: "Intendent", level: 9 },
-  { id: "COMMISSIONER_ROLE_ID", name: "Comissari", level: 8 },
-  { id: "INSPECTOR_ROLE_ID", name: "Inspector", level: 7 },
-  { id: "SOTSINSPECTOR_ROLE_ID", name: "Sotsinspector", level: 6 },
-  { id: "SERGENT_ROLE_ID", name: "Sergent", level: 5 },
-  { id: "CAPORAL_ROLE_ID", name: "Caporal", level: 4 },
-  { id: "AGENT_ROLE_ID", name: "Agent", level: 3 },
-  { id: "MOSSO_ROLE_ID", name: "Mosso", level: 2 },
-  { id: "PRACTIQUES_ROLE_ID", name: "Mosso en Pràctiques", level: 1 },
+  { id: "1484971616344608819", name: "Major", level: 12 },
+  { id: "1484971554751381579", name: "Comissari", level: 11 },
+  { id: "1484971480050700470", name: "Intendent", level: 10 },
+  { id: "1502473804759433308", name: "Inspector Jefe", level: 9 },
+  { id: "1484971390909157437", name: "Inspector", level: 8 },
+  { id: "1500052261739429888", name: "Inspector en Pràctiques", level: 7 },
+    { id: "1484971303470370906", name: "Sots-Inspector", level: 6 },
+    { id: "1484971112390459583", name: "Sergent", level: 5 },
+  { id: "1487507338054336552", name: "Sergent en Pràctiques", level: 4 },
+  { id: "1484971012138471475", name: "Caporal", level: 3 },
+  { id: "1484970937467277368", name: "Mosso", level: 2 },
+  { id: "1486761352017215600", name: "Mosso en Pràctiques", level: 1 },
 ];
 
-const SUPERIOR_SCALE_MIN_LEVEL = 6;
+const SUPERIOR_SCALE_MIN_LEVEL = 9;
 
 // Plates mapping discord_id -> plate
 const PLATES_MAP = {
