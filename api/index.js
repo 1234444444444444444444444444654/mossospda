@@ -302,7 +302,7 @@ module.exports = async function handler(req, res) {
       );
       if (!memberRes.ok) return res.redirect(`/?error=not_in_server`);
       const member = await memberRes.json();
-      if (!member.roles.includes(REQUIRED_ROLE)) return res.redirect(`/?error=no_role`);
+      if (!REQUIRED_ROLES.some(role => member.roles.includes(role))) return res.redirect(`/?error=no_role`);
 
       const db = await getDb();
       await db.collection("sessions").updateOne(
