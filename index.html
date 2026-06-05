@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PDA — Mossos d'Esquadra</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --navy: #0b1628;
+  --navy2: #111f38;
+  --navy3: #172847;
+  --blue: #1a4fa0;
+  --blue2: #2260c4;
+  --accent: #4a9eff;
+  --gold: #c8a74a;
+  --gold2: #f0cc6a;
+  --red: #d94040;
+  --green: #2da84a;
+  --green2: #3dcf5e;
+  --text: #e8edf5;
+  --text2: #a0aec0;
+  --text3: #667080;
+  --border: rgba(74,158,255,0.15);
+  --border2: rgba(74,158,255,0.08);
+  --glass: rgba(17,31,56,0.85);
+  --radius: 8px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; }
+body {
+  min-height: 100vh;
+  background: var(--navy);
+  color: var(--text);
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+/* BG pattern */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(74,158,255,0.04) 39px, rgba(74,158,255,0.04) 40px),
+    repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(74,158,255,0.04) 39px, rgba(74,158,255,0.04) 40px);
+  pointer-events: none;
+}
+#app { position: relative; z-index: 1; min-height: 100vh; }
+
+/* ─── SCREENS ─── */
+.screen { display: none; min-height: 100vh; }
+.screen.active { display: flex; flex-direction: column; }
+
+/* ─── LOGIN ─── */
+#screen-login {
+  align-items: center; justify-content: center;
+  background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(26,79,160,0.25) 0%, transparent 70%);
+}
+.login-box {
+  width: 420px; max-width: 94vw;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 48px 40px 40px;
+  text-align: center;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
+  animation: fadeUp 0.6s ease;
+}
+.login-logo { width: 90px; margin-bottom: 20px; filter: drop-shadow(0 4px 20px rgba(74,158,255,0.4)); }
+.login-title { font-family: 'Rajdhani', sans-serif; font-size: 28px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text); }
+.login-sub { font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: var(--gold); margin-top: 4px; margin-bottom: 32px; }
+.login-divider { height: 1px; background: var(--border); margin: 0 0 28px; }
+.btn-discord {
+  display: inline-flex; align-items: center; gap: 12px;
+  background: #5865F2; color: #fff;
+  border: none; border-radius: 8px;
+  padding: 14px 28px; font-size: 15px; font-weight: 600;
+  cursor: pointer; text-decoration: none;
+  transition: background 0.2s, transform 0.15s;
+  width: 100%; justify-content: center;
+  letter-spacing: 0.5px;
+}
+.btn-discord:hover { background: #4752c4; transform: translateY(-1px); }
+.btn-discord svg { width: 22px; height: 22px; }
+.login-note { font-size: 12px; color: var(--text3); margin-top: 20px; }
+.error-box { background: rgba(217,64,64,0.15); border: 1px solid rgba(217,64,64,0.4); border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; font-size: 13px; color: #ff8080; }
+
+/* ─── REGISTER ─── */
+#screen-register {
+  align-items: center; justify-content: center;
+  background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(26,79,160,0.2) 0%, transparent 70%);
+}
+.register-box {
+  width: 500px; max-width: 94vw;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 40px;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+  animation: fadeUp 0.5s ease;
+}
+.register-header { display: flex; align-items: center; gap: 14px; margin-bottom: 32px; }
+.register-logo { width: 50px; filter: drop-shadow(0 2px 10px rgba(74,158,255,0.4)); }
+.register-title { font-family: 'Rajdhani', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+.register-sub { font-size: 12px; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; }
+.form-group { margin-bottom: 20px; }
+.form-label { display: block; font-size: 12px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text2); margin-bottom: 8px; }
+.form-input {
+  width: 100%; background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 12px 16px; color: var(--text); font-size: 15px;
+  outline: none; transition: border-color 0.2s, background 0.2s;
+  font-family: inherit;
+}
+.form-input:focus { border-color: var(--accent); background: rgba(74,158,255,0.06); }
+.form-input::placeholder { color: var(--text3); }
+.btn-primary {
+  width: 100%; background: var(--blue2); color: #fff;
+  border: none; border-radius: var(--radius); padding: 14px;
+  font-size: 15px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+  cursor: pointer; transition: background 0.2s, transform 0.15s;
+  font-family: 'Rajdhani', sans-serif;
+}
+.btn-primary:hover:not(:disabled) { background: #2e74e8; transform: translateY(-1px); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.searching-avatar { display: none; align-items: center; gap: 10px; margin-top: 8px; font-size: 13px; color: var(--accent); }
+.searching-avatar.visible { display: flex; }
+.spinner { width: 16px; height: 16px; border: 2px solid rgba(74,158,255,0.3); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+.avatar-preview { display: none; align-items: center; gap: 12px; margin-top: 10px; background: rgba(74,158,255,0.08); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 14px; }
+.avatar-preview.visible { display: flex; }
+.avatar-preview img { width: 40px; height: 40px; border-radius: 6px; border: 2px solid var(--accent); }
+.avatar-preview span { font-size: 13px; color: var(--text2); }
+
+/* ─── PDA MAIN ─── */
+#screen-pda { flex-direction: row; }
+.sidebar {
+  width: 240px; min-height: 100vh;
+  background: var(--navy2);
+  border-right: 1px solid var(--border2);
+  display: flex; flex-direction: column;
+  position: fixed; top: 0; left: 0; bottom: 0; z-index: 10;
+}
+.sidebar-brand {
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--border2);
+  display: flex; align-items: center; gap: 12px;
+}
+.sidebar-logo { width: 36px; filter: drop-shadow(0 2px 8px rgba(74,158,255,0.4)); }
+.sidebar-brand-text .title { font-family: 'Rajdhani', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+.sidebar-brand-text .sub { font-size: 10px; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; }
+.sidebar-agent {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border2);
+}
+.agent-card { display: flex; align-items: center; gap: 10px; }
+.agent-avatar { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; border: 2px solid var(--accent); }
+.agent-avatar-placeholder { width: 44px; height: 44px; border-radius: 8px; background: var(--navy3); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--text3); font-size: 20px; }
+.agent-info .plate { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; color: var(--accent); }
+.agent-info .name { font-size: 12px; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
+.agent-info .rank-badge {
+  display: inline-block; font-size: 10px; font-weight: 600;
+  letter-spacing: 0.5px; padding: 2px 6px; border-radius: 4px;
+  background: rgba(200,167,74,0.15); color: var(--gold2); border: 1px solid rgba(200,167,74,0.3);
+  margin-top: 2px;
+}
+.sidebar-nav { flex: 1; padding: 12px 0; overflow-y: auto; }
+.nav-section { padding: 8px 20px 4px; font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--text3); }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 20px; cursor: pointer;
+  color: var(--text2); font-size: 14px; font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+  position: relative;
+}
+.nav-item:hover { background: rgba(74,158,255,0.07); color: var(--text); }
+.nav-item.active { background: rgba(74,158,255,0.12); color: var(--accent); }
+.nav-item.active::before { content: ''; position: absolute; left: 0; top: 6px; bottom: 6px; width: 3px; background: var(--accent); border-radius: 0 3px 3px 0; }
+.nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+.sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border2); }
+.btn-logout {
+  display: flex; align-items: center; gap: 8px;
+  color: var(--text3); font-size: 13px; cursor: pointer;
+  background: none; border: none; padding: 0; width: 100%;
+  transition: color 0.2s;
+}
+.btn-logout:hover { color: var(--red); }
+
+.main-content {
+  margin-left: 240px; flex: 1; min-height: 100vh;
+  padding: 32px;
+}
+.page { display: none; }
+.page.active { display: block; }
+.page-title {
+  font-family: 'Rajdhani', sans-serif; font-size: 26px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px;
+}
+.page-sub { font-size: 13px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 28px; }
+.divider { height: 1px; background: var(--border); margin-bottom: 28px; }
+
+/* ─── FICHAJE ─── */
+.service-card {
+  background: var(--navy2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 28px; margin-bottom: 24px;
+  position: relative; overflow: hidden;
+}
+.service-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--blue2), var(--accent));
+}
+.service-status-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  letter-spacing: 1px; text-transform: uppercase; margin-bottom: 20px;
+}
+.status-idle { background: rgba(102,112,128,0.2); color: var(--text3); border: 1px solid rgba(102,112,128,0.3); }
+.status-active { background: rgba(45,168,74,0.15); color: var(--green2); border: 1px solid rgba(45,168,74,0.4); }
+.status-paused { background: rgba(200,167,74,0.15); color: var(--gold2); border: 1px solid rgba(200,167,74,0.4); }
+.status-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+.timer-display {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 56px; font-weight: 600; letter-spacing: 2px;
+  color: var(--text); margin-bottom: 8px;
+  text-shadow: 0 0 30px rgba(74,158,255,0.3);
+}
+.timer-sub { display: flex; gap: 24px; margin-bottom: 28px; }
+.timer-sub-item { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--text3); }
+.timer-sub-item span { color: var(--text2); }
+.service-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn-service {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 24px; border-radius: 8px; font-size: 14px;
+  font-weight: 700; letter-spacing: 0.5px; font-family: 'Rajdhani', sans-serif;
+  cursor: pointer; border: none; transition: all 0.2s;
+  text-transform: uppercase;
+}
+.btn-start { background: var(--green); color: #fff; }
+.btn-start:hover { background: #25923f; }
+.btn-pause { background: rgba(200,167,74,0.2); color: var(--gold2); border: 1px solid rgba(200,167,74,0.4); }
+.btn-pause:hover { background: rgba(200,167,74,0.35); }
+.btn-stop { background: rgba(217,64,64,0.2); color: #ff8080; border: 1px solid rgba(217,64,64,0.4); }
+.btn-stop:hover { background: rgba(217,64,64,0.35); }
+
+/* ─── HISTORIAL ─── */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase; color: var(--text3);
+  padding: 10px 14px; text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+tbody tr { transition: background 0.15s; }
+tbody tr:hover { background: rgba(74,158,255,0.04); }
+tbody td { padding: 12px 14px; font-size: 14px; border-bottom: 1px solid var(--border2); color: var(--text2); }
+tbody td .mono { font-family: 'IBM Plex Mono', monospace; color: var(--text); }
+.badge-status { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+.badge-finished { background: rgba(45,168,74,0.15); color: var(--green2); }
+.badge-cancelled { background: rgba(217,64,64,0.15); color: #ff8080; }
+
+/* ─── TOP ─── */
+.top-list { display: flex; flex-direction: column; gap: 10px; }
+.top-item {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--navy2); border: 1px solid var(--border2);
+  border-radius: 10px; padding: 14px 18px;
+  transition: border-color 0.2s;
+}
+.top-item:hover { border-color: var(--border); }
+.top-rank { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; color: var(--text3); width: 32px; text-align: center; flex-shrink: 0; }
+.top-rank.gold { color: var(--gold2); }
+.top-rank.silver { color: #bdc3cc; }
+.top-rank.bronze { color: #c0804a; }
+.top-avatar { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; border: 2px solid var(--border); flex-shrink: 0; }
+.top-info { flex: 1; min-width: 0; }
+.top-info .top-name { font-weight: 600; color: var(--text); font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.top-info .top-meta { font-size: 12px; color: var(--text3); }
+.top-time { font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: var(--accent); text-align: right; flex-shrink: 0; }
+
+/* ─── ID CARD ─── */
+.id-card-wrap { display: flex; gap: 32px; align-items: flex-start; flex-wrap: wrap; }
+.id-card {
+  width: 340px; background: linear-gradient(135deg, #0d2240 0%, #1a3a6b 100%);
+  border: 1px solid rgba(74,158,255,0.3); border-radius: 14px;
+  overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  position: relative; flex-shrink: 0;
+}
+.id-card-header {
+  background: linear-gradient(90deg, #0a1930, #1a3060);
+  border-bottom: 2px solid var(--gold);
+  padding: 14px 18px; display: flex; align-items: center; gap: 12px;
+}
+.id-card-header img { width: 38px; filter: drop-shadow(0 2px 8px rgba(200,167,74,0.5)); }
+.id-card-header .hdr-text .t1 { font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gold2); }
+.id-card-header .hdr-text .t2 { font-size: 10px; color: rgba(200,167,74,0.7); letter-spacing: 1px; text-transform: uppercase; }
+.id-card-body { padding: 18px; display: flex; gap: 14px; }
+.id-card-photo { width: 90px; height: 90px; border-radius: 8px; border: 2px solid var(--gold); object-fit: cover; flex-shrink: 0; }
+.id-card-photo-ph { width: 90px; height: 90px; border-radius: 8px; border: 2px solid var(--border); background: var(--navy3); display: flex; align-items: center; justify-content: center; font-size: 36px; flex-shrink: 0; }
+.id-card-fields { flex: 1; }
+.id-card-field { margin-bottom: 8px; }
+.id-card-field .lbl { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.4); }
+.id-card-field .val { font-family: 'Rajdhani', sans-serif; font-size: 15px; font-weight: 700; color: var(--text); letter-spacing: 0.5px; }
+.id-card-plate {
+  margin: 0 18px 16px; padding: 10px 14px;
+  background: rgba(200,167,74,0.1); border: 1px solid rgba(200,167,74,0.3);
+  border-radius: 8px; display: flex; align-items: center; justify-content: space-between;
+}
+.id-card-plate .lbl { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: rgba(200,167,74,0.6); }
+.id-card-plate .val { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; color: var(--gold2); }
+.id-card-footer { padding: 10px 18px; background: rgba(0,0,0,0.3); border-top: 1px solid rgba(255,255,255,0.06); }
+.id-card-footer .rank-tag { font-size: 12px; font-weight: 600; letter-spacing: 1px; color: var(--accent); text-transform: uppercase; }
+
+/* ─── ADMIN ─── */
+.admin-section { margin-bottom: 32px; }
+.admin-section-title { font-family: 'Rajdhani', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text2); margin-bottom: 14px; }
+.agent-select-row { display: flex; gap: 12px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
+.form-select {
+  background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 10px 14px; color: var(--text);
+  font-size: 14px; outline: none; cursor: pointer;
+  font-family: inherit; min-width: 200px;
+}
+.form-select:focus { border-color: var(--accent); }
+.btn-secondary {
+  padding: 10px 20px; background: rgba(74,158,255,0.1); color: var(--accent);
+  border: 1px solid rgba(74,158,255,0.3); border-radius: var(--radius);
+  font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+  font-family: 'Rajdhani', sans-serif; letter-spacing: 0.5px; text-transform: uppercase;
+}
+.btn-secondary:hover { background: rgba(74,158,255,0.2); }
+.modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,0.7); align-items: center; justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--navy2); border: 1px solid var(--border);
+  border-radius: 14px; padding: 32px; width: 440px; max-width: 94vw;
+  animation: fadeUp 0.3s ease;
+}
+.modal-title { font-family: 'Rajdhani', sans-serif; font-size: 20px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 20px; }
+.modal-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
+.btn-danger { padding: 10px 20px; background: rgba(217,64,64,0.2); color: #ff8080; border: 1px solid rgba(217,64,64,0.4); border-radius: var(--radius); font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'Rajdhani', sans-serif; text-transform: uppercase; }
+.btn-danger:hover { background: rgba(217,64,64,0.35); }
+.btn-ghost { padding: 10px 20px; background: transparent; color: var(--text3); border: 1px solid var(--border); border-radius: var(--radius); font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Rajdhani', sans-serif; text-transform: uppercase; }
+.btn-ghost:hover { color: var(--text); border-color: var(--text3); }
+
+/* ─── STATS GRID ─── */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; margin-bottom: 28px; }
+.stat-card { background: var(--navy2); border: 1px solid var(--border2); border-radius: 10px; padding: 18px 20px; }
+.stat-card .s-label { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); margin-bottom: 6px; }
+.stat-card .s-value { font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 600; color: var(--text); }
+.stat-card .s-value.accent { color: var(--accent); }
+.stat-card .s-value.gold { color: var(--gold2); }
+.stat-card .s-value.green { color: var(--green2); }
+
+/* ─── TOAST ─── */
+.toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 200; display: flex; flex-direction: column; gap: 8px; }
+.toast {
+  background: var(--navy2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px 18px; font-size: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4); animation: slideIn 0.3s ease;
+  max-width: 320px;
+}
+.toast.success { border-left: 3px solid var(--green); }
+.toast.error { border-left: 3px solid var(--red); }
+.toast.info { border-left: 3px solid var(--accent); }
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes fadeUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── LOADING ─── */
+.loading-overlay {
+  display: none; position: fixed; inset: 0; z-index: 300;
+  background: var(--navy); align-items: center; justify-content: center; flex-direction: column; gap: 16px;
+}
+.loading-overlay.visible { display: flex; }
+.loading-logo { width: 70px; animation: pulse 1.5s ease infinite; filter: drop-shadow(0 4px 20px rgba(74,158,255,0.5)); }
+.loading-text { font-family: 'Rajdhani', sans-serif; font-size: 16px; letter-spacing: 3px; text-transform: uppercase; color: var(--text3); }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); transition: transform 0.3s; }
+  .sidebar.open { transform: translateX(0); }
+  .main-content { margin-left: 0; padding: 20px 16px; }
+  .timer-display { font-size: 36px; }
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loading-overlay">
+  <img class="loading-logo" src="https://tse4.mm.bing.net/th/id/OIP.dcr6F7FOdXMSpqCqtDf--wHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" />
+  <div class="loading-text">Verificando acceso...</div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- SCREEN: LOGIN -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="screen-login" class="screen">
+  <div class="login-box">
+    <img class="login-logo" src="https://tse4.mm.bing.net/th/id/OIP.dcr6F7FOdXMSpqCqtDf--wHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" />
+    <div class="login-title">Mossos d'Esquadra</div>
+    <div class="login-sub">Sistema PDA — Acceso Restringido</div>
+    <div class="login-divider"></div>
+    <div id="login-error" class="error-box" style="display:none"></div>
+    <a id="discord-login-btn" class="btn-discord" href="#">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.08.114 18.1.134 18.12a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+      Iniciar sesión con Discord
+    </a>
+    <div class="login-note">Solo personal autorizado del servidor oficial</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- SCREEN: REGISTER -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="screen-register" class="screen">
+  <div class="register-box">
+    <div class="register-header">
+      <img class="register-logo" src="https://tse4.mm.bing.net/th/id/OIP.dcr6F7FOdXMSpqCqtDf--wHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" />
+      <div>
+        <div class="register-title">Registro de Agente</div>
+        <div class="register-sub">Completa tu perfil</div>
+      </div>
+    </div>
+    <div id="register-error" class="error-box" style="display:none"></div>
+    <div class="form-group">
+      <label class="form-label">Nombre completo</label>
+      <input type="text" id="reg-fullname" class="form-input" placeholder="Nombre Apellido Apellido" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">DNI</label>
+      <input type="text" id="reg-dni" class="form-input" placeholder="12345678X" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Usuario de Roblox</label>
+      <input type="text" id="reg-roblox" class="form-input" placeholder="Tu_Usuario_Roblox" />
+      <div class="searching-avatar" id="searching-indicator">
+        <div class="spinner"></div>
+        <span>Buscando avatar...</span>
+      </div>
+      <div class="avatar-preview" id="avatar-preview">
+        <img id="avatar-preview-img" src="" alt="Avatar" />
+        <span id="avatar-preview-name"></span>
+      </div>
+    </div>
+    <button class="btn-primary" id="reg-submit" onclick="submitRegister()">
+      Crear perfil y acceder a la PDA
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- SCREEN: PDA -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="screen-pda" class="screen">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img class="sidebar-logo" src="https://tse4.mm.bing.net/th/id/OIP.dcr6F7FOdXMSpqCqtDf--wHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" />
+      <div class="sidebar-brand-text">
+        <div class="title">Mossos</div>
+        <div class="sub">Sistema PDA</div>
+      </div>
+    </div>
+
+    <div class="sidebar-agent">
+      <div class="agent-card">
+        <div id="sidebar-avatar-wrap">
+          <div class="agent-avatar-placeholder">👤</div>
+        </div>
+        <div class="agent-info">
+          <div class="plate" id="sidebar-plate">—</div>
+          <div class="name" id="sidebar-name">Cargando...</div>
+          <div class="rank-badge" id="sidebar-rank">—</div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">Principal</div>
+      <div class="nav-item active" onclick="showPage('page-fichaje')">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Fichaje
+      </div>
+      <div class="nav-item" onclick="showPage('page-historial')">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Mis Servicios
+      </div>
+      <div class="nav-item" onclick="showPage('page-top')">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="18 20 18 10"/><polyline points="12 20 12 4"/><polyline points="6 20 6 14"/></svg>
+        Ranking
+      </div>
+      <div class="nav-item" onclick="showPage('page-id')">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        Mi TIP
+      </div>
+      <div id="admin-nav-section" style="display:none">
+        <div class="nav-section">Administración</div>
+        <div class="nav-item" onclick="showPage('page-admin')">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Panel Admin
+        </div>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="btn-logout" onclick="logout()">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16" height="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Cerrar sesión
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+
+    <!-- ─ PAGE: FICHAJE ─ -->
+    <div id="page-fichaje" class="page active">
+      <div class="page-title">Fichaje de Servicio</div>
+      <div class="page-sub">Control de tiempo en servicio</div>
+      <div class="divider"></div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="s-label">Servicios Totales</div>
+          <div class="s-value accent" id="stat-total-services">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-label">Horas Totales</div>
+          <div class="s-value gold" id="stat-total-hours">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-label">Estado Actual</div>
+          <div class="s-value" id="stat-status">—</div>
+        </div>
+      </div>
+
+      <div class="service-card">
+        <div class="service-status-badge status-idle" id="service-badge">
+          <div class="status-dot"></div>
+          <span id="service-badge-text">Sin servicio activo</span>
+        </div>
+        <div class="timer-display" id="timer-display">00:00:00</div>
+        <div class="timer-sub">
+          <div class="timer-sub-item">Activo: <span id="timer-active">00:00:00</span></div>
+          <div class="timer-sub-item">Pausa: <span id="timer-pause">00:00:00</span></div>
+        </div>
+        <div class="service-actions">
+          <button class="btn-service btn-start" id="btn-start" onclick="startService()">
+            <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" width="18" height="18"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Iniciar Servicio
+          </button>
+          <button class="btn-service btn-pause" id="btn-pause" onclick="pauseService()" style="display:none">
+            <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" width="18" height="18"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+            Pausar
+          </button>
+          <button class="btn-service btn-stop" id="btn-stop" onclick="stopService()" style="display:none">
+            <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" width="18" height="18"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            Finalizar Servicio
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─ PAGE: HISTORIAL ─ -->
+    <div id="page-historial" class="page">
+      <div class="page-title">Mis Servicios</div>
+      <div class="page-sub">Historial completo de servicios realizados</div>
+      <div class="divider"></div>
+
+      <div class="stats-grid" id="hist-stats"></div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Inicio</th>
+              <th>Fin</th>
+              <th>Activo</th>
+              <th>Pausa</th>
+              <th>Total</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="history-tbody">
+            <tr><td colspan="7" style="text-align:center;color:var(--text3);padding:32px">Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ─ PAGE: TOP ─ -->
+    <div id="page-top" class="page">
+      <div class="page-title">Ranking de Agentes</div>
+      <div class="page-sub">Ordenado por tiempo activo total</div>
+      <div class="divider"></div>
+      <div class="top-list" id="top-list">
+        <div style="text-align:center;color:var(--text3);padding:32px">Cargando...</div>
+      </div>
+    </div>
+
+    <!-- ─ PAGE: ID / TIP ─ -->
+    <div id="page-id" class="page">
+      <div class="page-title">Mi TIP</div>
+      <div class="page-sub">Tarjeta de identificación profesional</div>
+      <div class="divider"></div>
+
+      <div class="id-card-wrap">
+        <div class="id-card" id="id-card-el">
+          <div class="id-card-header">
+            <img src="https://tse4.mm.bing.net/th/id/OIP.dcr6F7FOdXMSpqCqtDf--wHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" />
+            <div class="hdr-text">
+              <div class="t1">Mossos d'Esquadra</div>
+              <div class="t2">Targeta d'Identificació Professional</div>
+            </div>
+          </div>
+          <div class="id-card-body">
+            <div>
+              <div id="id-card-photo-wrap" class="id-card-photo-ph">👤</div>
+            </div>
+            <div class="id-card-fields">
+              <div class="id-card-field">
+                <div class="lbl">Nombre</div>
+                <div class="val" id="id-card-name">—</div>
+              </div>
+              <div class="id-card-field">
+                <div class="lbl">DNI</div>
+                <div class="val" id="id-card-dni">—</div>
+              </div>
+              <div class="id-card-field">
+                <div class="lbl">Discord</div>
+                <div class="val" id="id-card-discord">—</div>
+              </div>
+            </div>
+          </div>
+          <div class="id-card-plate">
+            <div class="lbl">Número de Placa</div>
+            <div class="val" id="id-card-plate">—</div>
+          </div>
+          <div class="id-card-footer">
+            <div class="rank-tag" id="id-card-rank">—</div>
+          </div>
+        </div>
+
+        <div style="max-width:380px">
+          <div style="background:var(--navy2);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px">
+            <div style="font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;color:var(--gold2)">¿Qué es el TIP?</div>
+            <p style="font-size:14px;color:var(--text2);line-height:1.7">La identificación policial es la forma en que un agente acredita oficialmente que pertenece a las Fuerzas y Cuerpos de Seguridad. Se realiza mostrando la TIP o cartera policial, donde aparece su número profesional y los elementos que legitiman su autoridad.</p>
+            <br>
+            <p style="font-size:14px;color:var(--text2);line-height:1.7">Un ciudadano puede solicitar esta identificación <strong style="color:var(--text)">cuando esté siendo objeto de una actuación policial</strong>. La identificación policial garantiza transparencia, responsabilidad y control legal sobre la actuación de la autoridad.</p>
+          </div>
+          <img src="https://media.discordapp.net/attachments/1495910520182673559/1512423936900599908/image.png?ex=6a240a0e&is=6a22b88e&hm=2513dc0fed668f5d6b357f593b71252e49a3ea4d641feb795ffadce59dfdf8f9&=&format=webp&quality=lossless" style="width:100%;border-radius:10px;border:1px solid var(--border)" />
+        </div>
+      </div>
+    </div>
+
+    <!-- ─ PAGE: ADMIN ─ -->
+    <div id="page-admin" class="page">
+      <div class="page-title">Panel de Administración</div>
+      <div class="page-sub">Escala Superior — Gestión de servicios</div>
+      <div class="divider"></div>
+
+      <div class="admin-section">
+        <div class="admin-section-title">Consultar servicios por agente</div>
+        <div class="agent-select-row">
+          <select class="form-select" id="admin-agent-select">
+            <option value="">Seleccionar agente...</option>
+          </select>
+          <button class="btn-secondary" onclick="loadAdminServices()">Ver servicios</button>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Placa</th>
+                <th>Activo</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="admin-tbody">
+              <tr><td colspan="6" style="text-align:center;color:var(--text3);padding:32px">Selecciona un agente</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div><!-- /screen-pda -->
+
+</div><!-- /app -->
+
+<!-- MODAL EDITAR SERVICIO -->
+<div class="modal-overlay" id="modal-edit">
+  <div class="modal">
+    <div class="modal-title">Editar Servicio</div>
+    <div class="form-group">
+      <label class="form-label">Tiempo activo (segundos)</label>
+      <input type="number" id="edit-seconds" class="form-input" placeholder="3600" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Motivo</label>
+      <input type="text" id="edit-motivo" class="form-input" placeholder="Motivo de la modificación..." />
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal('modal-edit')">Cancelar</button>
+      <button class="btn-danger" onclick="cancelService()">Anular servicio</button>
+      <button class="btn-primary" style="width:auto;padding:10px 20px" onclick="saveEditService()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────────────────────────────
+const DISCORD_CLIENT_ID = '1488651862021509231';
+const REDIRECT_URI = window.location.origin + '/api/auth/callback';
+const OAUTH_URL = `https://discord.com/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=identify+guilds.members.read`;
+
+// ─────────────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────────────
+let state = {
+  token: null,
+  discordId: null,
+  user: null,
+  serviceInterval: null,
+  serviceStartTs: null,
+  servicePauseTs: null,
+  serviceStatus: 'idle', // idle | active | paused
+  totalPaused: 0,
+  editingServiceId: null,
+  myServices: [],
+};
+
+// ─────────────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────────────
+document.getElementById('discord-login-btn').href = OAUTH_URL;
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token');
+  const discordId = params.get('discord_id');
+  const error = params.get('error');
+
+  if (error) {
+    showScreen('screen-login');
+    const el = document.getElementById('login-error');
+    el.style.display = 'block';
+    el.textContent = error === 'not_in_server'
+      ? '❌ No estás en el servidor de Discord requerido.'
+      : error === 'no_role'
+      ? '❌ No tienes el rol necesario para acceder.'
+      : '❌ Error al iniciar sesión.';
+    return;
+  }
+
+  if (token && discordId) {
+    state.token = token;
+    state.discordId = discordId;
+    localStorage.setItem('pda_token', token);
+    localStorage.setItem('pda_discord_id', discordId);
+    window.history.replaceState({}, '', '/');
+  } else {
+    state.token = localStorage.getItem('pda_token');
+    state.discordId = localStorage.getItem('pda_discord_id');
+  }
+
+  if (!state.token) { showScreen('screen-login'); return; }
+
+  showLoading(true);
+  try {
+    const me = await api('/api/auth/me');
+    state.user = me;
+    if (!me.agent) {
+      showLoading(false);
+      showScreen('screen-register');
+    } else {
+      initPDA();
+    }
+  } catch {
+    showLoading(false);
+    localStorage.clear();
+    showScreen('screen-login');
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────
+// API HELPER
+// ─────────────────────────────────────────────────────────────────
+async function api(path, method = 'GET', body = null) {
+  const opts = {
+    method,
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${state.token}` },
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(path, opts);
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+// ─────────────────────────────────────────────────────────────────
+// SCREENS
+// ─────────────────────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  showLoading(false);
+}
+function showLoading(v) {
+  document.getElementById('loading-overlay').classList.toggle('visible', v);
+}
+
+// ─────────────────────────────────────────────────────────────────
+// REGISTER
+// ─────────────────────────────────────────────────────────────────
+let robloxDebounce = null;
+document.getElementById('reg-roblox')?.addEventListener('input', function() {
+  clearTimeout(robloxDebounce);
+  const val = this.value.trim();
+  if (!val) {
+    document.getElementById('avatar-preview').classList.remove('visible');
+    return;
+  }
+  document.getElementById('searching-indicator').classList.add('visible');
+  document.getElementById('avatar-preview').classList.remove('visible');
+  robloxDebounce = setTimeout(async () => {
+    try {
+      const r = await fetch(`https://users.roblox.com/v1/usernames/users`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usernames: [val], excludeBannedUsers: false }),
+      });
+      const data = await r.json();
+      if (data.data && data.data.length > 0) {
+        const userId = data.data[0].id;
+        const ar = await fetch(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`);
+        const ad = await ar.json();
+        if (ad.data && ad.data.length > 0) {
+          document.getElementById('avatar-preview-img').src = ad.data[0].imageUrl;
+          document.getElementById('avatar-preview-name').textContent = `✓ ${data.data[0].name}`;
+          document.getElementById('avatar-preview').classList.add('visible');
+        }
+      }
+    } catch {}
+    document.getElementById('searching-indicator').classList.remove('visible');
+  }, 800);
+});
+
+async function submitRegister() {
+  const fullName = document.getElementById('reg-fullname').value.trim();
+  const dni = document.getElementById('reg-dni').value.trim();
+  const robloxUsername = document.getElementById('reg-roblox').value.trim();
+  const errEl = document.getElementById('register-error');
+
+  if (!fullName || !dni || !robloxUsername) {
+    errEl.style.display = 'block'; errEl.textContent = 'Por favor, rellena todos los campos.'; return;
+  }
+  const btn = document.getElementById('reg-submit');
+  btn.disabled = true; btn.textContent = 'Procesando...';
+  errEl.style.display = 'none';
+
+  try {
+    await api('/api/agent/register', 'POST', { fullName, dni, robloxUsername });
+    const me = await api('/api/auth/me');
+    state.user = me;
+    toast('✅ Perfil creado correctamente', 'success');
+    initPDA();
+  } catch (e) {
+    errEl.style.display = 'block';
+    errEl.textContent = '❌ ' + (JSON.parse(e.message)?.error || 'Error al registrar');
+    btn.disabled = false; btn.textContent = 'Crear perfil y acceder a la PDA';
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// PDA INIT
+// ─────────────────────────────────────────────────────────────────
+async function initPDA() {
+  showScreen('screen-pda');
+  showLoading(false);
+  const u = state.user;
+  const agent = u.agent;
+
+  // Sidebar
+  document.getElementById('sidebar-plate').textContent = agent.plate || '—';
+  document.getElementById('sidebar-name').textContent = agent.fullName || u.username;
+  document.getElementById('sidebar-rank').textContent = agent.rank || '—';
+  if (agent.robloxAvatar) {
+    document.getElementById('sidebar-avatar-wrap').innerHTML =
+      `<img class="agent-avatar" src="${agent.robloxAvatar}" />`;
+  }
+
+  // Admin nav
+  if (u.isSuperiorScale) {
+    document.getElementById('admin-nav-section').style.display = 'block';
+    loadAdminAgents();
+  }
+
+  // ID card
+  document.getElementById('id-card-name').textContent = agent.fullName || '—';
+  document.getElementById('id-card-dni').textContent = agent.dni || '—';
+  document.getElementById('id-card-discord').textContent = u.username || '—';
+  document.getElementById('id-card-plate').textContent = agent.plate || '—';
+  document.getElementById('id-card-rank').textContent = agent.rank || '—';
+  if (agent.robloxAvatar) {
+    document.getElementById('id-card-photo-wrap').outerHTML =
+      `<img class="id-card-photo" src="${agent.robloxAvatar}" />`;
+  }
+
+  // Load my services stats
+  await loadMyServicesStats();
+
+  // Check active service
+  await checkActiveService();
+}
+
+async function loadMyServicesStats() {
+  try {
+    const data = await api('/api/services/mine');
+    state.myServices = data.services;
+    const total = data.services.length;
+    const totalActive = data.totalActive || 0;
+    document.getElementById('stat-total-services').textContent = total;
+    document.getElementById('stat-total-hours').textContent = formatTime(totalActive);
+  } catch {}
+}
+
+async function checkActiveService() {
+  try {
+    const data = await api('/api/service/active');
+    if (data.service) {
+      const s = data.service;
+      state.serviceStartTs = new Date(s.startTime).getTime();
+      state.totalPaused = s.pauseSeconds || 0;
+      if (s.status === 'paused') {
+        state.serviceStatus = 'paused';
+        state.servicePauseTs = new Date(s.lastPauseStart).getTime();
+      } else {
+        state.serviceStatus = 'active';
+      }
+      updateServiceUI();
+      startTimer();
+    }
+  } catch {}
+}
+
+// ─────────────────────────────────────────────────────────────────
+// TIMER
+// ─────────────────────────────────────────────────────────────────
+function startTimer() {
+  if (state.serviceInterval) clearInterval(state.serviceInterval);
+  state.serviceInterval = setInterval(updateTimerDisplay, 1000);
+  updateTimerDisplay();
+}
+function stopTimer() {
+  if (state.serviceInterval) clearInterval(state.serviceInterval);
+  state.serviceInterval = null;
+}
+
+function updateTimerDisplay() {
+  if (!state.serviceStartTs) return;
+  const now = Date.now();
+  const total = Math.floor((now - state.serviceStartTs) / 1000);
+  let paused = state.totalPaused;
+  if (state.serviceStatus === 'paused' && state.servicePauseTs) {
+    paused += Math.floor((now - state.servicePauseTs) / 1000);
+  }
+  const active = Math.max(0, total - paused);
+  document.getElementById('timer-display').textContent = formatTime(total);
+  document.getElementById('timer-active').textContent = formatTime(active);
+  document.getElementById('timer-pause').textContent = formatTime(paused);
+}
+
+function updateServiceUI() {
+  const badge = document.getElementById('service-badge');
+  const badgeText = document.getElementById('service-badge-text');
+  const btnStart = document.getElementById('btn-start');
+  const btnPause = document.getElementById('btn-pause');
+  const btnStop = document.getElementById('btn-stop');
+  const statStatus = document.getElementById('stat-status');
+
+  if (state.serviceStatus === 'idle') {
+    badge.className = 'service-status-badge status-idle';
+    badgeText.textContent = 'Sin servicio activo';
+    btnStart.style.display = 'inline-flex';
+    btnPause.style.display = 'none';
+    btnStop.style.display = 'none';
+    statStatus.textContent = 'Inactivo';
+    statStatus.style.color = 'var(--text3)';
+  } else if (state.serviceStatus === 'active') {
+    badge.className = 'service-status-badge status-active';
+    badgeText.textContent = 'Servicio en curso';
+    btnStart.style.display = 'none';
+    btnPause.style.display = 'inline-flex';
+    btnPause.innerHTML = `<svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" width="18" height="18"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Pausar`;
+    btnStop.style.display = 'inline-flex';
+    statStatus.textContent = 'Activo';
+    statStatus.style.color = 'var(--green2)';
+  } else if (state.serviceStatus === 'paused') {
+    badge.className = 'service-status-badge status-paused';
+    badgeText.textContent = 'Servicio pausado';
+    btnStart.style.display = 'none';
+    btnPause.style.display = 'inline-flex';
+    btnPause.innerHTML = `<svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" width="18" height="18"><polygon points="5 3 19 12 5 21 5 3"/></svg> Reanudar`;
+    btnStop.style.display = 'inline-flex';
+    statStatus.textContent = 'Pausado';
+    statStatus.style.color = 'var(--gold2)';
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// FICHAJE ACTIONS
+// ─────────────────────────────────────────────────────────────────
+async function startService() {
+  try {
+    await api('/api/service/start', 'POST');
+    state.serviceStartTs = Date.now();
+    state.totalPaused = 0;
+    state.serviceStatus = 'active';
+    updateServiceUI();
+    startTimer();
+    toast('▶ Servicio iniciado', 'success');
+  } catch (e) {
+    toast('❌ ' + parseError(e), 'error');
+  }
+}
+
+async function pauseService() {
+  try {
+    const data = await api('/api/service/pause', 'POST');
+    if (data.status === 'paused') {
+      state.servicePauseTs = Date.now();
+      state.serviceStatus = 'paused';
+      toast('⏸ Servicio pausado', 'info');
+    } else {
+      state.totalPaused += Math.floor((Date.now() - state.servicePauseTs) / 1000);
+      state.servicePauseTs = null;
+      state.serviceStatus = 'active';
+      toast('▶ Servicio reanudado', 'success');
+    }
+    updateServiceUI();
+  } catch (e) {
+    toast('❌ ' + parseError(e), 'error');
+  }
+}
+
+async function stopService() {
+  if (!confirm('¿Seguro que quieres finalizar el servicio?')) return;
+  try {
+    const data = await api('/api/service/end', 'POST');
+    stopTimer();
+    state.serviceStatus = 'idle';
+    state.serviceStartTs = null;
+    state.servicePauseTs = null;
+    state.totalPaused = 0;
+    document.getElementById('timer-display').textContent = '00:00:00';
+    document.getElementById('timer-active').textContent = '00:00:00';
+    document.getElementById('timer-pause').textContent = '00:00:00';
+    updateServiceUI();
+    await loadMyServicesStats();
+    toast(`✅ Servicio finalizado — Activo: ${formatTime(data.activeSeconds)}`, 'success');
+  } catch (e) {
+    toast('❌ ' + parseError(e), 'error');
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// HISTORIAL
+// ─────────────────────────────────────────────────────────────────
+async function loadHistory() {
+  const tbody = document.getElementById('history-tbody');
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:32px">Cargando...</td></tr>';
+  try {
+    const data = await api('/api/services/mine');
+    state.myServices = data.services;
+
+    // Stats
+    const statsEl = document.getElementById('hist-stats');
+    statsEl.innerHTML = `
+      <div class="stat-card"><div class="s-label">Total servicios</div><div class="s-value accent">${data.services.length}</div></div>
+      <div class="stat-card"><div class="s-label">Tiempo activo total</div><div class="s-value gold">${formatTime(data.totalActive)}</div></div>
+    `;
+
+    if (!data.services.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:32px">No tienes servicios registrados</td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.services.map(s => `
+      <tr>
+        <td class="mono">${new Date(s.startTime).toLocaleDateString('es')}</td>
+        <td class="mono">${new Date(s.startTime).toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})}</td>
+        <td class="mono">${s.endTime ? new Date(s.endTime).toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'}) : '—'}</td>
+        <td class="mono">${formatTime(s.activeSeconds || 0)}</td>
+        <td class="mono">${formatTime(s.pauseSeconds || 0)}</td>
+        <td class="mono">${formatTime(s.totalSeconds || 0)}</td>
+        <td>${s.status === 'finished' ? '<span class="badge-status badge-finished">Completado</span>' : '<span class="badge-status badge-cancelled">Anulado</span>'}</td>
+      </tr>`).join('');
+  } catch {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:32px">Error al cargar</td></tr>';
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// TOP
+// ─────────────────────────────────────────────────────────────────
+async function loadTop() {
+  const listEl = document.getElementById('top-list');
+  listEl.innerHTML = '<div style="text-align:center;color:var(--text3);padding:32px">Cargando...</div>';
+  try {
+    const data = await api('/api/services/top');
+    if (!data.top.length) {
+      listEl.innerHTML = '<div style="text-align:center;color:var(--text3);padding:32px">No hay datos</div>';
+      return;
+    }
+    listEl.innerHTML = data.top.map((entry, i) => {
+      const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+      const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
+      return `
+      <div class="top-item">
+        <div class="top-rank ${rankClass}">${medal}</div>
+        ${entry.robloxAvatar ? `<img class="top-avatar" src="${entry.robloxAvatar}" />` : '<div class="top-avatar" style="background:var(--navy3);display:flex;align-items:center;justify-content:center;color:var(--text3)">👤</div>'}
+        <div class="top-info">
+          <div class="top-name">${entry.fullName}</div>
+          <div class="top-meta">${entry.plate} · ${entry.rank} · ${entry.count} servicio${entry.count !== 1 ? 's' : ''}</div>
+        </div>
+        <div class="top-time">${formatTime(entry.totalActive)}</div>
+      </div>`;
+    }).join('');
+  } catch {
+    listEl.innerHTML = '<div style="text-align:center;color:var(--text3);padding:32px">Error al cargar</div>';
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// ADMIN
+// ─────────────────────────────────────────────────────────────────
+async function loadAdminAgents() {
+  try {
+    const data = await api('/api/admin/agents');
+    const sel = document.getElementById('admin-agent-select');
+    sel.innerHTML = '<option value="">Seleccionar agente...</option>';
+    data.agents.forEach(a => {
+      const opt = document.createElement('option');
+      opt.value = a.discordId;
+      opt.textContent = `${a.plate} — ${a.fullName}`;
+      sel.appendChild(opt);
+    });
+  } catch {}
+}
+
+async function loadAdminServices() {
+  const discordId = document.getElementById('admin-agent-select').value;
+  const tbody = document.getElementById('admin-tbody');
+  if (!discordId) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:32px">Selecciona un agente</td></tr>'; return; }
+  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:32px">Cargando...</td></tr>';
+  try {
+    const data = await api(`/api/admin/services?discordId=${discordId}`);
+    if (!data.services.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:32px">Sin servicios</td></tr>';
+      return;
+    }
+    const agentPlate = document.getElementById('admin-agent-select').options[document.getElementById('admin-agent-select').selectedIndex].text.split('—')[0].trim();
+    tbody.innerHTML = data.services.map(s => `
+      <tr>
+        <td class="mono">${new Date(s.startTime).toLocaleDateString('es')} ${new Date(s.startTime).toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})}</td>
+        <td>${agentPlate}</td>
+        <td class="mono">${formatTime(s.activeSeconds || 0)}</td>
+        <td class="mono">${formatTime(s.totalSeconds || 0)}</td>
+        <td>${s.status === 'finished' ? '<span class="badge-status badge-finished">Completado</span>' : '<span class="badge-status badge-cancelled">Anulado</span>'}</td>
+        <td>${s.status === 'finished' ? `<button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="openEditModal('${s._id}', ${s.activeSeconds || 0})">Editar</button>` : '—'}</td>
+      </tr>`).join('');
+  } catch {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:32px">Error al cargar</td></tr>';
+  }
+}
+
+function openEditModal(serviceId, currentSeconds) {
+  state.editingServiceId = serviceId;
+  document.getElementById('edit-seconds').value = currentSeconds;
+  document.getElementById('edit-motivo').value = '';
+  document.getElementById('modal-edit').classList.add('open');
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+async function saveEditService() {
+  const activeSeconds = parseInt(document.getElementById('edit-seconds').value);
+  const motivo = document.getElementById('edit-motivo').value.trim();
+  if (!motivo) { toast('Debes indicar un motivo', 'error'); return; }
+  try {
+    await api('/api/admin/service/edit', 'PATCH', { serviceId: state.editingServiceId, activeSeconds, motivo });
+    closeModal('modal-edit');
+    toast('✅ Servicio modificado', 'success');
+    loadAdminServices();
+  } catch { toast('❌ Error al modificar', 'error'); }
+}
+
+async function cancelService() {
+  const motivo = document.getElementById('edit-motivo').value.trim();
+  if (!motivo) { toast('Debes indicar un motivo para anular', 'error'); return; }
+  if (!confirm('¿Seguro que quieres ANULAR este servicio?')) return;
+  try {
+    await api('/api/admin/service/edit', 'PATCH', { serviceId: state.editingServiceId, cancelled: true, motivo });
+    closeModal('modal-edit');
+    toast('✅ Servicio anulado', 'success');
+    loadAdminServices();
+  } catch { toast('❌ Error al anular', 'error'); }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// NAV
+// ─────────────────────────────────────────────────────────────────
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const navMap = { 'page-fichaje': 0, 'page-historial': 1, 'page-top': 2, 'page-id': 3, 'page-admin': 4 };
+  const items = document.querySelectorAll('.nav-item');
+  const idx = navMap[id];
+  if (items[idx]) items[idx].classList.add('active');
+
+  if (id === 'page-historial') loadHistory();
+  if (id === 'page-top') loadTop();
+}
+
+function logout() {
+  if (!confirm('¿Cerrar sesión?')) return;
+  localStorage.clear();
+  window.location.reload();
+}
+
+// ─────────────────────────────────────────────────────────────────
+// UTILS
+// ─────────────────────────────────────────────────────────────────
+function formatTime(s) {
+  if (!s || isNaN(s)) return '00:00:00';
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+function parseError(e) {
+  try { return JSON.parse(e.message)?.error || 'Error'; } catch { return 'Error'; }
+}
+function toast(msg, type = 'info') {
+  const c = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  c.appendChild(el);
+  setTimeout(() => el.remove(), 4000);
+}
+</script>
+</body>
+</html>
