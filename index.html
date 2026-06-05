@@ -279,12 +279,88 @@ tbody td .mono{font-family:'IBM Plex Mono',monospace;color:var(--text)}
 /* PROMOTION ITEM */
 .promotion-item{background:rgba(45,168,74,0.06);border:1px solid rgba(45,168,74,0.2);border-radius:8px;padding:14px 16px;margin-bottom:8px}
 .promotion-item.descenso{background:rgba(217,64,64,0.06);border-color:rgba(217,64,64,0.2)}
-/* RESPONSIVE */
-@media (max-width:768px){
-  .sidebar{transform:translateX(-100%);transition:transform 0.3s}
-  .sidebar.open{transform:translateX(0)}
-  .main-content{margin-left:0;padding:20px 16px}
-  .timer-display{font-size:36px}
+/* RESPONSIVE - Bottom Navigation en Móvil */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 68px;
+    flex-direction: row;
+    align-items: center;
+    border-right: none;
+    border-top: 1px solid var(--border2);
+    z-index: 100;
+    padding: 0 6px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
+    background: var(--navy2);
+  }
+
+  .sidebar-brand,
+  .sidebar-agent,
+  .sidebar-footer,
+  .nav-section {
+    display: none !important;
+  }
+
+  .sidebar-nav {
+    flex: 1;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    height: 100%;
+    gap: 4px;
+  }
+
+  .nav-item {
+    padding: 6px 10px;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 10.5px;
+    min-width: 58px;
+    text-align: center;
+    border-radius: 8px;
+  }
+
+  .nav-item svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .nav-item.active {
+    background: rgba(74,158,255,0.15);
+    color: var(--accent);
+  }
+
+  .nav-item.active::before {
+    display: none;
+  }
+
+  .main-content {
+    margin-left: 0 !important;
+    padding: 20px 16px 85px !important;
+  }
+
+  .timer-display {
+    font-size: 42px;
+  }
+
+  .service-card {
+    padding: 22px;
+  }
+}
+
+/* Desktop - Sidebar normal */
+@media (min-width: 769px) {
+  .sidebar {
+    transform: none !important;
+  }
 }
 </style>
 </head>
@@ -1690,6 +1766,22 @@ function toast(msg, type='info') {
   el.className = `toast ${type}`; el.textContent = msg;
   c.appendChild(el);
   setTimeout(() => el.remove(), 4000);
+}
+  // Inicializar Bottom Nav en móvil
+function initMobileNav() {
+  const sidebar = document.querySelector('.sidebar');
+  if (window.innerWidth <= 768) {
+    sidebar.classList.add('open');
+  }
+}
+
+// Llamar dentro de initPDA()
+async function initPDA() {
+  showScreen('screen-pda');
+  showLoading(false);
+  // ... todo tu código actual ...
+
+  initMobileNav();   // ← Añade esta línea al final de la función
 }
 </script>
 </body>
