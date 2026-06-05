@@ -485,14 +485,14 @@ tbody td .mono{font-family:'IBM Plex Mono',monospace;color:var(--text)}
   });
 
   // Detectar si DevTools está abierto y redirigir
-  setInterval(() => {
+setInterval(() => {
     const threshold = 160;
     if (
       window.outerWidth - window.innerWidth > threshold ||
       window.outerHeight - window.innerHeight > threshold
     ) {
       document.body.innerHTML = '';
-      window.location.reload();
+      window.location.href = 'https://discord.gg/5zzprwT8kW';
     }
   }, 1000);
 })();
