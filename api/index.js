@@ -257,7 +257,7 @@ module.exports = async function handler(req, res) {
         { upsert: true }
       );
 
-console.log("✅ Redirecting with token:", tokens.access_token ? "YES" : "NO");
+const redirectUrl = `/?token=${tokens.access_token}&discord_id=${discordUser.id}`;
 return res.redirect(redirectUrl);
     }
 
