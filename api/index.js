@@ -69,9 +69,22 @@ const PLATES_MAP = {
 };
 
 let cachedClient = null;
+let cachedClient = null;
+
 async function getDb() {
+  if (cachedClient) {
+    try {
+      // Comprueba que la conexión sigue viva
+      await cachedClient.db("admin").command({ ping: 1 });
+    } catch {
+      cachedClient = null;
+    }
+  }
   if (!cachedClient) {
-    cachedClient = new MongoClient(process.env.MONGODB_URI);
+    cachedClient = new MongoClient(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 10000,
+    });
     await cachedClient.connect();
   }
   return cachedClient.db("mossos_pda");
