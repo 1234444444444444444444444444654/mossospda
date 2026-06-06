@@ -468,7 +468,12 @@ tbody td .mono{font-family:'IBM Plex Mono',monospace;color:var(--text)}
 // ── ANTI-DEVTOOLS ──
 (function() {
   // Bloquear click derecho
-  document.addEventListener('contextmenu', e => e.preventDefault());
+  // ✅ Excluye inputs y textareas
+document.addEventListener('contextmenu', e => {
+  const tag = e.target.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || e.target.isContentEditable) return;
+  e.preventDefault();
+});
 
   // Bloquear atajos de teclado
   document.addEventListener('keydown', e => {
