@@ -1074,39 +1074,39 @@ const msg = cancelled
 
       return res.status(200).json({ sanctions });
     }
-    // ── ADMIN: Pausar/Reanudar servicio de un agente ─────────────────────────
-if (path === "/api/admin/service/pause" && req.method === "POST") {
-  const token = req.headers.authorization?.replace("Bearer ", "");
-  const db = await getDb();
-  const session = await db.collection("sessions").findOne({ accessToken: token });
-  if (!session) return res.status(401).json({ error: "Unauthorized" });
-  const { level } = await getMemberLevel(session.discordId);
-  if (level < SUPERIOR_SCALE_MIN_LEVEL) return res.status(403).json({ error: "No autorizado" });
-  const body = req.body || (await parseBody(req));
-  const { discordId: targetId, serviceId } = body;
-  const service = await db.collection("services").findOne({ _id: new ObjectId(serviceId) });
-  if (!service) return res.status(404).json({ error: "Servicio no encontrado" });
-  const now = new Date();
-  let newStatus;
-  if (service.status === "active") {
-    await db.collection("services").updateOne(
-      { _id: new ObjectId(serviceId) },
-      { $set: { status: "paused", lastPauseStart: now }, $push: { pauses: { start: now, end: null } } }
-    );
-    newStatus = "paused";
-    try { await sendDiscordDM(targetId, `⏸ Tu servicio ha sido **pausado** por un administrador.`); } catch {}
-  } else {
-    const pauseDuration = Math.floor((now - new Date(service.lastPauseStart)) / 1000);
-    const pauses = service.pauses;
-    pauses[pauses.length - 1].end = now;
-    await db.collection("services").updateOne(
-      { _id: new ObjectId(serviceId) },
-      { $set: { status: "active", lastPauseStart: null, pauses }, $inc: { pauseSeconds: pauseDuration } }
-    );
-    newStatus = "active";
-    try { await sendDiscordDM(targetId, `▶ Tu servicio ha sido **reanudado** por un administrador.`); } catch {}
-  }
-const adminAgentLog = await db.collection("agents").findOne({ discordId: session.discordId });
+// ── ADMIN: Pausar/Reanudar servicio de un agente ─────────────────────────
+    if (path === "/api/admin/service/pause" && req.method === "POST") {
+      const token = req.headers.authorization?.replace("Bearer ", "");
+      const db = await getDb();
+      const session = await db.collection("sessions").findOne({ accessToken: token });
+      if (!session) return res.status(401).json({ error: "Unauthorized" });
+      const { level } = await getMemberLevel(session.discordId);
+      if (level < SUPERIOR_SCALE_MIN_LEVEL) return res.status(403).json({ error: "No autorizado" });
+      const body = req.body || (await parseBody(req));
+      const { discordId: targetId, serviceId } = body;
+      const service = await db.collection("services").findOne({ _id: new ObjectId(serviceId) });
+      if (!service) return res.status(404).json({ error: "Servicio no encontrado" });
+      const now = new Date();
+      let newStatus;
+      if (service.status === "active") {
+        await db.collection("services").updateOne(
+          { _id: new ObjectId(serviceId) },
+          { $set: { status: "paused", lastPauseStart: now }, $push: { pauses: { start: now, end: null } } }
+        );
+        newStatus = "paused";
+        try { await sendDiscordDM(targetId, `⏸ Tu servicio ha sido **pausado** por un administrador.`); } catch {}
+      } else {
+        const pauseDuration = Math.floor((now - new Date(service.lastPauseStart)) / 1000);
+        const pauses = service.pauses;
+        pauses[pauses.length - 1].end = now;
+        await db.collection("services").updateOne(
+          { _id: new ObjectId(serviceId) },
+          { $set: { status: "active", lastPauseStart: null, pauses }, $inc: { pauseSeconds: pauseDuration } }
+        );
+        newStatus = "active";
+        try { await sendDiscordDM(targetId, `▶ Tu servicio ha sido **reanudado** por un administrador.`); } catch {}
+      }
+      const adminAgentLog = await db.collection("agents").findOne({ discordId: session.discordId });
       const targetAgentLog = await db.collection("agents").findOne({ discordId: targetId });
       await saveLog(db, {
         type: 'service_pause',
@@ -1117,7 +1117,34 @@ const adminAgentLog = await db.collection("agents").findOne({ discordId: session
         description: `Servicio ${newStatus === 'paused' ? 'pausado' : 'reanudado'} por administrador`,
       });
       return res.status(200).json({ success: true, status: newStatus });
-    
+    }
+
+    // ── ADMIN: Logs ───────────────────────────────────────────────────────────
+    if (path === "/api/admin/logs" && req.method === "GET") {
+      const token = req.headers.authorization?.replace("Bearer ", "");
+      const db = await getDb();
+      const session = await db.collection("sessions").findOne({ accessToken: token });
+      if (!session) return res.status(401).json({ error: "Unauthorized" });
+      const { level } = await getMemberLevel(session.discordId);
+      if (level < SUPERIOR_SCALE_MIN_LEVEL) return res.status(403).json({ error: "No autorizado" });
+      const type = url.searchParams.get("type") || '';
+      const adminId = url.searchParams.get("adminId") || '';
+      const query = {};
+      if (type) query.type = type;
+      if (adminId) query.adminDiscordId = adminId;
+      const logs = await db.collection("logs")
+        .find(query)
+        .sort({ createdAt: -1 })
+        .limit(200)
+        .toArray();
+      const adminIds = [...new Set(logs.map(l => l.adminDiscordId))];
+      const admins = await Promise.all(adminIds.map(async id => {
+        const a = await db.collection("agents").findOne({ discordId: id });
+        return { discordId: id, fullName: a?.fullName, username: a?.discordUsername || id };
+      }));
+      return res.status(200).json({ logs, admins });
+    }
+
     return res.status(404).json({ error: "Not found" });
   } catch (err) {
     console.error(err);
