@@ -774,15 +774,11 @@ const msg = cancelled
         adminName: adminAgentLog?.fullName || session.discordId,
         targetDiscordId: service.discordId,
         targetName: targetAgentLog?.fullName || service.discordId,
-        description: cancelled
+   description: cancelled
           ? `Servicio anulado. Motivo: ${motivo}`
           : `Servicio editado — restados ${formatSeconds(body.reduceSeconds || 0)}. Nuevo activo: ${formatSeconds(parseInt(finalActiveSeconds))}. Motivo: ${motivo}`,
       });
 
-      return res.status(200).json({ success: true, newActiveSeconds: finalActiveSeconds });
-    }
-
-      return res.status(200).json({ success: true, newActiveSeconds: finalActiveSeconds });
       return res.status(200).json({ success: true, newActiveSeconds: finalActiveSeconds });
     }
 
