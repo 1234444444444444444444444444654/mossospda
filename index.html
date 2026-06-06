@@ -491,17 +491,15 @@ document.addEventListener('contextmenu', e => {
 
   // Detectar si DevTools está abierto y redirigir
 setInterval(() => {
-    const threshold = 160;
-    const widthDiff = window.outerWidth - window.innerWidth;
-    const heightDiff = window.outerHeight - window.innerHeight;
-    // En móvil la barra de navegador puede dar ~80px de diferencia, usamos 300 para evitar falsos positivos
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    const mobileThreshold = isMobile ? 300 : threshold;
-    if (widthDiff > mobileThreshold || heightDiff > mobileThreshold) {
-      document.body.innerHTML = '';
-      window.location.href = 'https://discord.gg/5zzprwT8kW';
-    }
-  }, 1000);
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if (isMobile) return; // En móvil no hacer nada
+  const widthDiff = window.outerWidth - window.innerWidth;
+  const heightDiff = window.outerHeight - window.innerHeight;
+  if (widthDiff > 160 || heightDiff > 160) {
+    document.body.innerHTML = '';
+    window.location.href = 'https://discord.gg/5zzprwT8kW';
+  }
+}, 1000);
 })();
 </script>
 <body>
