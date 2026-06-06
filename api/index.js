@@ -760,11 +760,11 @@ module.exports = async function handler(req, res) {
         );
       }
 
-      const msg = cancelled
+const msg = cancelled
         ? `⚠️ Tu servicio del ${new Date(service.startTime).toLocaleDateString("es")} ha sido **anulado**.\n📝 Motivo: ${motivo}`
         : `ℹ️ Tu servicio del ${new Date(service.startTime).toLocaleDateString("es")} ha sido **modificado**.\n⏱️ Nuevo tiempo activo: ${formatSeconds(parseInt(finalActiveSeconds))}\n📝 Motivo: ${motivo}`;
 
-     try { await sendDiscordDM(service.discordId, msg); } catch {}
+      try { await sendDiscordDM(service.discordId, msg); } catch {}
 
       const adminAgentLog = await db.collection("agents").findOne({ discordId: session.discordId });
       const targetAgentLog = await db.collection("agents").findOne({ discordId: service.discordId });
@@ -778,6 +778,9 @@ module.exports = async function handler(req, res) {
           ? `Servicio anulado. Motivo: ${motivo}`
           : `Servicio editado — restados ${formatSeconds(body.reduceSeconds || 0)}. Nuevo activo: ${formatSeconds(parseInt(finalActiveSeconds))}. Motivo: ${motivo}`,
       });
+
+      return res.status(200).json({ success: true, newActiveSeconds: finalActiveSeconds });
+    }
 
       return res.status(200).json({ success: true, newActiveSeconds: finalActiveSeconds });
       return res.status(200).json({ success: true, newActiveSeconds: finalActiveSeconds });
