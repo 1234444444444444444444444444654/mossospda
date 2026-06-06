@@ -423,7 +423,12 @@ module.exports = async function handler(req, res) {
         { upsert: true }
       );
 
-      try { await setDiscordNickname(session.discordId, nickname); } catch {}
+      try { await setDiscordNickname(session.discordId, nickname); } catch (_e) {}
+
+      // ← AÑADE ESTO:
+      return res.status(200).json({ success: true, plate, agent: agentData });
+    }  // ← cierra el if de /api/agent/register
+
     // ── FICHAJE: Iniciar servicio ────────────────────────────────────────────
     if (path === "/api/service/start" && req.method === "POST") {
       const token = req.headers.authorization?.replace("Bearer ", "");
