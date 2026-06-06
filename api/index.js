@@ -95,9 +95,9 @@ async function getDb() {
   if (cachedClient) {
     try {
       await cachedClient.db("admin").command({ ping: 1 });
-    } catch {
-      cachedClient = null;
-    }
+} catch (_e) {
+  cachedClient = null;
+}
   }
   if (!cachedClient) {
     cachedClient = new MongoClient(process.env.MONGODB_URI, {
@@ -234,9 +234,9 @@ async function getRobloxAvatar(username) {
       return { url: avatarData.data[0].imageUrl, robloxId: userId };
     }
     return null;
-  } catch {
-    return null;
-  }
+} catch (_e) {
+  return null;
+}
 }
 
 async function getMemberLevel(discordId) {
@@ -1164,7 +1164,7 @@ async function parseBody(req) {
     let body = "";
     req.on("data", (chunk) => (body += chunk));
     req.on("end", () => {
-      try { resolve(JSON.parse(body)); } catch { resolve({}); }
+      try { resolve(JSON.parse(body)); } catch (_e) { resolve({}); }
     });
   });
 }
