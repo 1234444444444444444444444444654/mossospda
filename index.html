@@ -759,12 +759,13 @@ setInterval(() => {
       <div class="page-sub">Escala Superior — Gestión completa</div>
       <div class="divider"></div>
 
-      <div class="tab-bar">
-        <button class="tab-btn active" onclick="showAdminTab('tab-agentes')">Agentes</button>
-        <button class="tab-btn" onclick="showAdminTab('tab-servicios')">Servicios</button>
-        <button class="tab-btn" onclick="showAdminTab('tab-ascensos')">Ascensos/Descensos</button>
-        <button class="tab-btn" onclick="showAdminTab('tab-sanciones')">Sanciones</button>
-      </div>
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="showAdminTab('tab-agentes')">Agentes</button>
+  <button class="tab-btn" onclick="showAdminTab('tab-servicios')">Servicios</button>
+  <button class="tab-btn" onclick="showAdminTab('tab-ascensos')">Ascensos/Descensos</button>
+  <button class="tab-btn" onclick="showAdminTab('tab-sanciones')">Sanciones</button>
+  <button class="tab-btn" onclick="showAdminTab('tab-logs')">Logs</button>
+</div>
 
       <!-- TAB AGENTES -->
       <div id="tab-agentes" class="tab-content active">
@@ -872,15 +873,34 @@ setInterval(() => {
           </div>
           <button class="btn-primary" style="max-width:280px" onclick="submitSanction()">Registrar Sanción</button>
         </div>
-        <div id="sanc-history-wrap" style="display:none">
+       <div id="sanc-history-wrap" style="display:none">
           <div class="admin-section-title" style="margin-top:24px">Historial de sanciones del agente</div>
           <div id="sanc-history-list"></div>
         </div>
       </div>
+
+      <!-- TAB LOGS -->
+      <div id="tab-logs" class="tab-content">
+        <div class="admin-section-title">Registro de Acciones</div>
+        <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+          <select class="form-select" id="log-filter-type" onchange="loadLogs()" style="min-width:160px">
+            <option value="">Todos los tipos</option>
+            <option value="promotion">Ascensos/Descensos</option>
+            <option value="sanction">Sanciones</option>
+            <option value="service_edit">Edición servicios</option>
+            <option value="service_cancel">Anulación servicios</option>
+            <option value="service_pause">Pausas admin</option>
+          </select>
+          <select class="form-select" id="log-filter-admin" onchange="loadLogs()" style="min-width:200px">
+            <option value="">Todos los admins</option>
+          </select>
+        </div>
+        <div id="logs-list"><div style="text-align:center;color:var(--text3);padding:32px">Cargando...</div></div>
+      </div>
+
     </div>
 
   </main>
-</div>
   <!-- ══ MOBILE BOTTOM NAV ══ -->
 <nav class="mobile-nav" id="mobile-nav">
   <div class="mobile-nav-items">
@@ -914,33 +934,36 @@ setInterval(() => {
 <div class="modal-overlay" id="modal-edit">
   <div class="modal">
     <div class="modal-title">Editar Servicio</div>
-    <div style="margin-bottom:12px;font-size:13px;color:var(--text3)">Tiempo actual: <span id="edit-current-time" style="color:var(--text);font-family:'IBM Plex Mono',monospace"></span></div>
-    <div class="tab-bar" style="margin-bottom:16px">
-      <button class="tab-btn active" onclick="switchEditMode('set')" id="edit-mode-set">Establecer tiempo</button>
-      <button class="tab-btn" onclick="switchEditMode('reduce')" id="edit-mode-reduce">Reducir tiempo</button>
+    <div style="margin-bottom:20px;background:var(--navy3);border:1px solid var(--border);border-radius:8px;padding:14px 16px">
+      <div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Tiempo activo actual</div>
+      <div id="edit-current-time" style="font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:600;color:var(--text)">00:00:00</div>
     </div>
-    <div id="edit-set-panel">
-      <div class="form-group">
-        <label class="form-label">Nuevo tiempo activo (segundos)</label>
-        <input type="number" id="edit-seconds" class="form-input" placeholder="3600" oninput="updateEditPreview()" />
+    <div class="form-group">
+      <label class="form-label">Tiempo a restar</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+        <div>
+          <div style="font-size:11px;color:var(--text3);text-align:center;margin-bottom:6px;letter-spacing:1px;text-transform:uppercase">Horas</div>
+          <input type="number" id="reduce-h" class="form-input" placeholder="0" min="0" style="text-align:center;font-family:'IBM Plex Mono',monospace;font-size:20px" oninput="updateEditPreview()" />
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text3);text-align:center;margin-bottom:6px;letter-spacing:1px;text-transform:uppercase">Minutos</div>
+          <input type="number" id="reduce-m" class="form-input" placeholder="0" min="0" max="59" style="text-align:center;font-family:'IBM Plex Mono',monospace;font-size:20px" oninput="updateEditPreview()" />
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text3);text-align:center;margin-bottom:6px;letter-spacing:1px;text-transform:uppercase">Segundos</div>
+          <input type="number" id="reduce-s" class="form-input" placeholder="0" min="0" max="59" style="text-align:center;font-family:'IBM Plex Mono',monospace;font-size:20px" oninput="updateEditPreview()" />
+        </div>
       </div>
     </div>
-  <div id="edit-reduce-panel" style="display:none">
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
-        <div class="form-group" style="margin-bottom:0">
-          <label class="form-label">Horas</label>
-          <input type="number" id="reduce-h" class="form-input" placeholder="0" min="0" oninput="updateEditPreview()" />
-        </div>
-        <div class="form-group" style="margin-bottom:0">
-          <label class="form-label">Minutos</label>
-          <input type="number" id="reduce-m" class="form-input" placeholder="0" min="0" max="59" oninput="updateEditPreview()" />
-        </div>
-        <div class="form-group" style="margin-bottom:0">
-          <label class="form-label">Segundos</label>
-          <input type="number" id="reduce-s" class="form-input" placeholder="0" min="0" max="59" oninput="updateEditPreview()" />
-        </div>
+    <div id="edit-time-preview" style="display:none;background:var(--navy3);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:16px">
+      <div style="font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Vista previa</div>
+      <div style="display:flex;align-items:center;gap:12px;font-family:'IBM Plex Mono',monospace">
+        <span id="preview-before" style="color:var(--text3);text-decoration:line-through;font-size:18px"></span>
+        <span style="color:var(--text3)">−</span>
+        <span id="preview-reduce" style="color:#ff8080;font-size:18px"></span>
+        <span style="color:var(--text3)">=</span>
+        <span id="preview-after" style="color:var(--green2);font-size:20px;font-weight:600"></span>
       </div>
-      <div id="edit-time-preview" class="time-preview" style="display:none"></div>
     </div>
     <div class="form-group">
       <label class="form-label">Motivo</label>
@@ -948,7 +971,7 @@ setInterval(() => {
     </div>
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closeModal('modal-edit')">Cancelar</button>
-      <button class="btn-danger" onclick="cancelService()">Anular servicio</button>
+      <button class="btn-danger" onclick="confirmCancelService()">Anular servicio</button>
       <button class="btn-primary" style="width:auto;padding:10px 20px" onclick="saveEditService()">Guardar</button>
     </div>
   </div>
@@ -1737,12 +1760,18 @@ async function loadAdminServices() {
     tbody.innerHTML = data.services.map(s => {
       let acciones = '—';
       if (s.status === 'finished') {
-        acciones = `<button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="openEditModal('${s._id}',${s.activeSeconds||0})">Editar</button>`;
-      } else if (s.status === 'active') {
-        acciones = `<button class="btn-pause" style="padding:6px 12px;font-size:12px;border-radius:6px;font-family:'Rajdhani',sans-serif;font-weight:700;cursor:pointer;border:1px solid rgba(200,167,74,0.4);background:rgba(200,167,74,0.2);color:var(--gold2)" onclick="adminPauseService('${discordId}','${s._id}')">⏸ Pausar</button>`;
-      } else if (s.status === 'paused') {
-        acciones = `<button class="btn-start" style="padding:6px 12px;font-size:12px;border-radius:6px;font-family:'Rajdhani',sans-serif;font-weight:700;cursor:pointer;border:none" onclick="adminPauseService('${discordId}','${s._id}')">▶ Reanudar</button>`;
-      }
+  acciones = `<button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="openEditModal('${s._id}',${s.activeSeconds||0})">Editar</button>`;
+} else if (s.status === 'active') {
+  acciones = `<div style="display:flex;gap:6px">
+    <button style="padding:6px 12px;font-size:12px;border-radius:6px;font-family:'Rajdhani',sans-serif;font-weight:700;cursor:pointer;border:1px solid rgba(200,167,74,0.4);background:rgba(200,167,74,0.2);color:var(--gold2)" onclick="adminPauseService('${discordId}','${s._id}')">⏸ Pausar</button>
+    <button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="openEditModal('${s._id}',${s.activeSeconds||0})">Editar</button>
+  </div>`;
+} else if (s.status === 'paused') {
+  acciones = `<div style="display:flex;gap:6px">
+    <button style="padding:6px 12px;font-size:12px;border-radius:6px;font-family:'Rajdhani',sans-serif;font-weight:700;cursor:pointer;border:none;background:var(--green);color:#fff" onclick="adminPauseService('${discordId}','${s._id}')">▶ Reanudar</button>
+    <button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="openEditModal('${s._id}',${s.activeSeconds||0})">Editar</button>
+  </div>`;
+}
       return `<tr>
         <td class="mono">${new Date(s.startTime).toLocaleDateString('es')} ${new Date(s.startTime).toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})}</td>
         <td>${plate}</td>
@@ -1776,57 +1805,53 @@ function switchEditMode(mode) {
 }
 
 function updateEditPreview() {
+  const h = parseInt(document.getElementById('reduce-h').value) || 0;
+  const m = parseInt(document.getElementById('reduce-m').value) || 0;
+  const s = parseInt(document.getElementById('reduce-s').value) || 0;
+  const reduce = h * 3600 + m * 60 + s;
   const preview = document.getElementById('edit-time-preview');
-  if (editCurrentMode === 'reduce') {
-    const h = parseInt(document.getElementById('reduce-h').value) || 0;
-    const m = parseInt(document.getElementById('reduce-m').value) || 0;
-    const s = parseInt(document.getElementById('reduce-s').value) || 0;
-    const reduce = h * 3600 + m * 60 + s;
+  if (reduce > 0) {
     const newVal = Math.max(0, state.editCurrentSeconds - reduce);
     preview.style.display = 'block';
-    preview.innerHTML = `<span class="before">${formatTime(state.editCurrentSeconds)}</span> → <span class="after">${formatTime(newVal)}</span> (−${formatTime(reduce)})`;
+    document.getElementById('preview-before').textContent = formatTime(state.editCurrentSeconds);
+    document.getElementById('preview-reduce').textContent = formatTime(reduce);
+    document.getElementById('preview-after').textContent = formatTime(newVal);
   } else {
-    document.getElementById('edit-time-preview').style.display = 'none';
+    preview.style.display = 'none';
   }
 }
 
 function openEditModal(serviceId, currentSeconds) {
   state.editingServiceId = serviceId;
   state.editCurrentSeconds = currentSeconds;
-  document.getElementById('edit-seconds').value = currentSeconds;
   document.getElementById('reduce-h').value = '';
   document.getElementById('reduce-m').value = '';
   document.getElementById('reduce-s').value = '';
   document.getElementById('edit-motivo').value = '';
   document.getElementById('edit-current-time').textContent = formatTime(currentSeconds);
   document.getElementById('edit-time-preview').style.display = 'none';
-  switchEditMode('set');
   document.getElementById('modal-edit').classList.add('open');
 }
 
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
 async function saveEditService() {
+  const h = parseInt(document.getElementById('reduce-h').value) || 0;
+  const m = parseInt(document.getElementById('reduce-m').value) || 0;
+  const s = parseInt(document.getElementById('reduce-s').value) || 0;
+  const reduceSeconds = h * 3600 + m * 60 + s;
   const motivo = document.getElementById('edit-motivo').value.trim();
   if (!motivo) { toast('Debes indicar un motivo', 'error'); return; }
-  let body = { serviceId: state.editingServiceId, motivo };
-  if (editCurrentMode === 'reduce') {
-    const h = parseInt(document.getElementById('reduce-h').value) || 0;
-    const m = parseInt(document.getElementById('reduce-m').value) || 0;
-    const s = parseInt(document.getElementById('reduce-s').value) || 0;
-    body.reduceSeconds = h * 3600 + m * 60 + s;
-  } else {
-    body.activeSeconds = parseInt(document.getElementById('edit-seconds').value);
-  }
+  if (reduceSeconds <= 0) { toast('Indica el tiempo a restar', 'error'); return; }
   try {
-    const res = await api('/api/admin/service/edit', 'PATCH', body);
+    const res = await api('/api/admin/service/edit', 'PATCH', { serviceId: state.editingServiceId, reduceSeconds, motivo });
     closeModal('modal-edit');
-    toast(`✅ Servicio modificado → ${formatTime(res.newActiveSeconds)}`, 'success');
+    toast(`✅ Restados ${formatTime(reduceSeconds)} → Nuevo total: ${formatTime(res.newActiveSeconds)}`, 'success');
     loadAdminServices();
   } catch { toast('❌ Error al modificar', 'error'); }
 }
   
-async function cancelService() {
+async function confirmCancelService() {
   const motivo = document.getElementById('edit-motivo').value.trim();
   if (!motivo) { toast('Debes indicar un motivo para anular', 'error'); return; }
   if (!confirm('¿Seguro que quieres ANULAR este servicio?')) return;
@@ -1972,6 +1997,7 @@ function showAdminTab(id) {
   document.querySelectorAll('#page-admin .tab-btn').forEach(el => el.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   event.target.classList.add('active');
+  if (id === 'tab-logs') loadLogs();
 }
 
 // ── NAV ──
@@ -2031,6 +2057,58 @@ window.showPage = function(id) {
   const mnavId = _navPageMap[id];
   if (mnavId) setMobileActive(mnavId);
 };
+
+  async function loadLogs() {
+  const listEl = document.getElementById('logs-list');
+  listEl.innerHTML = '<div style="text-align:center;color:var(--text3);padding:32px">Cargando...</div>';
+  const type = document.getElementById('log-filter-type')?.value || '';
+  const adminId = document.getElementById('log-filter-admin')?.value || '';
+  try {
+    const data = await api(`/api/admin/logs?type=${type}&adminId=${adminId}`);
+
+    // Poblar filtro de admins
+    const adminSel = document.getElementById('log-filter-admin');
+    if (adminSel && data.admins) {
+      const current = adminSel.value;
+      adminSel.innerHTML = '<option value="">Todos los admins</option>';
+      data.admins.forEach(a => {
+        const opt = document.createElement('option');
+        opt.value = a.discordId;
+        opt.textContent = `${a.fullName || a.username}`;
+        if (opt.value === current) opt.selected = true;
+        adminSel.appendChild(opt);
+      });
+    }
+
+    if (!data.logs.length) {
+      listEl.innerHTML = '<div style="text-align:center;color:var(--text3);padding:32px">Sin registros</div>';
+      return;
+    }
+
+    const typeLabels = {
+      promotion: { label: 'Ascenso/Descenso', color: 'var(--gold2)', bg: 'rgba(200,167,74,0.1)', border: 'rgba(200,167,74,0.3)' },
+      sanction: { label: 'Sanción', color: '#ff8080', bg: 'rgba(217,64,64,0.08)', border: 'rgba(217,64,64,0.25)' },
+      service_edit: { label: 'Edición Servicio', color: 'var(--accent)', bg: 'rgba(74,158,255,0.08)', border: 'rgba(74,158,255,0.2)' },
+      service_cancel: { label: 'Anulación Servicio', color: '#ff8080', bg: 'rgba(217,64,64,0.08)', border: 'rgba(217,64,64,0.25)' },
+      service_pause: { label: 'Pausa Admin', color: 'var(--green2)', bg: 'rgba(45,168,74,0.08)', border: 'rgba(45,168,74,0.25)' },
+    };
+
+    listEl.innerHTML = data.logs.map(log => {
+      const t = typeLabels[log.type] || { label: log.type, color: 'var(--text2)', bg: 'rgba(255,255,255,0.04)', border: 'var(--border)' };
+      return `<div style="background:${t.bg};border:1px solid ${t.border};border-radius:8px;padding:14px 16px;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;flex-wrap:wrap;gap:8px">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;background:${t.bg};color:${t.color};border:1px solid ${t.border};letter-spacing:1px;text-transform:uppercase">${t.label}</span>
+            <span style="font-size:13px;font-weight:600;color:var(--text)">${log.adminName || '—'}</span>
+            <span style="font-size:12px;color:var(--text3)">→ ${log.targetName || '—'}</span>
+          </div>
+          <span style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;flex-shrink:0">${new Date(log.createdAt).toLocaleString('es')}</span>
+        </div>
+        <div style="font-size:13px;color:var(--text2)">${log.description}</div>
+      </div>`;
+    }).join('');
+  } catch { listEl.innerHTML = '<div style="text-align:center;color:var(--text3);padding:32px">Error al cargar</div>'; }
+}
 </script>
 </body>
 </html>
