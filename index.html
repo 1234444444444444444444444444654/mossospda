@@ -925,10 +925,20 @@ setInterval(() => {
         <input type="number" id="edit-seconds" class="form-input" placeholder="3600" oninput="updateEditPreview()" />
       </div>
     </div>
-    <div id="edit-reduce-panel" style="display:none">
-      <div class="form-group">
-        <label class="form-label">Reducir por (segundos)</label>
-        <input type="number" id="reduce-seconds" class="form-input" placeholder="600" oninput="updateEditPreview()" />
+  <div id="edit-reduce-panel" style="display:none">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Horas</label>
+          <input type="number" id="reduce-h" class="form-input" placeholder="0" min="0" oninput="updateEditPreview()" />
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Minutos</label>
+          <input type="number" id="reduce-m" class="form-input" placeholder="0" min="0" max="59" oninput="updateEditPreview()" />
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Segundos</label>
+          <input type="number" id="reduce-s" class="form-input" placeholder="0" min="0" max="59" oninput="updateEditPreview()" />
+        </div>
       </div>
       <div id="edit-time-preview" class="time-preview" style="display:none"></div>
     </div>
@@ -1133,8 +1143,14 @@ async function submitRegister() {
     btn.disabled = false; btn.textContent = 'Crear perfil y acceder a la PDA';
   }
 }
+  
+  const REQUIRED_ROLES_CLIENT = [
+  "1484971616344608819","1484971554751381579","1484971480050700470",
+  "1502473804759433308","1484971390909157437","1500052261739429888",
+  "1484971303470370906","1484971112390459583","1487507338054336552",
+  "1484971012138471475","1484970937467277368","1486761352017215600",
+];
 
-// ── PDA INIT ──
 async function initPDA() {
   showScreen('screen-pda');
   showLoading(false);
@@ -1176,6 +1192,36 @@ async function initPDA() {
 
   // Build rank grid for admin
   buildRankGrid();
+
+  // Detectar cambio de rango o pérdida de acceso
+  const savedRank = localStorage.getItem('pda_rank');
+  const currentRank = agent.rank || '';
+  const hasAccess = u.roles && REQUIRED_ROLES_CLIENT.some(r => u.roles.includes(r));
+
+  if (!hasAccess) {
+    // Perdió el acceso al servidor o a los roles
+    localStorage.clear();
+    document.body.innerHTML = `<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--navy);flex-direction:column;gap:20px;text-align:center;padding:32px">
+      <div style="font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:700;color:#ff8080;letter-spacing:2px">ACCESO REVOCADO</div>
+      <div style="color:var(--text2);max-width:400px">Ya no tienes los roles necesarios para acceder al sistema PDA. Contacta con un superior.</div>
+      <a href="/" style="background:var(--blue2);color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-family:'Rajdhani',sans-serif;font-weight:700;letter-spacing:1px;text-transform:uppercase">Volver al inicio</a>
+    </div>`;
+    return;
+  }
+
+  if (savedRank && savedRank !== currentRank) {
+    // El rango cambió, mostrar pantalla de actualización
+    localStorage.setItem('pda_rank', currentRank);
+    document.body.innerHTML = `<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--navy);flex-direction:column;gap:20px;text-align:center;padding:32px">
+      <div style="font-size:48px">🔄</div>
+      <div style="font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:700;color:var(--gold2);letter-spacing:2px">RANGO ACTUALIZADO</div>
+      <div style="color:var(--text2);max-width:400px">Tu rango ha cambiado a <strong style="color:var(--accent)">${currentRank}</strong>. Recarga la página para aplicar los cambios.</div>
+      <button onclick="window.location.reload()" style="background:var(--blue2);color:#fff;padding:12px 28px;border-radius:8px;border:none;cursor:pointer;font-family:'Rajdhani',sans-serif;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-size:15px">Recargar ahora</button>
+    </div>`;
+    return;
+  }
+
+  localStorage.setItem('pda_rank', currentRank);
 
   await loadMyServicesStats();
   await loadMyRegistrosStats();
@@ -1732,12 +1778,15 @@ function switchEditMode(mode) {
 function updateEditPreview() {
   const preview = document.getElementById('edit-time-preview');
   if (editCurrentMode === 'reduce') {
-    const reduce = parseInt(document.getElementById('reduce-seconds').value) || 0;
+    const h = parseInt(document.getElementById('reduce-h').value) || 0;
+    const m = parseInt(document.getElementById('reduce-m').value) || 0;
+    const s = parseInt(document.getElementById('reduce-s').value) || 0;
+    const reduce = h * 3600 + m * 60 + s;
     const newVal = Math.max(0, state.editCurrentSeconds - reduce);
     preview.style.display = 'block';
     preview.innerHTML = `<span class="before">${formatTime(state.editCurrentSeconds)}</span> → <span class="after">${formatTime(newVal)}</span> (−${formatTime(reduce)})`;
   } else {
-    preview.style.display = 'none';
+    document.getElementById('edit-time-preview').style.display = 'none';
   }
 }
 
@@ -1745,7 +1794,9 @@ function openEditModal(serviceId, currentSeconds) {
   state.editingServiceId = serviceId;
   state.editCurrentSeconds = currentSeconds;
   document.getElementById('edit-seconds').value = currentSeconds;
-  document.getElementById('reduce-seconds').value = '';
+  document.getElementById('reduce-h').value = '';
+  document.getElementById('reduce-m').value = '';
+  document.getElementById('reduce-s').value = '';
   document.getElementById('edit-motivo').value = '';
   document.getElementById('edit-current-time').textContent = formatTime(currentSeconds);
   document.getElementById('edit-time-preview').style.display = 'none';
@@ -1760,7 +1811,10 @@ async function saveEditService() {
   if (!motivo) { toast('Debes indicar un motivo', 'error'); return; }
   let body = { serviceId: state.editingServiceId, motivo };
   if (editCurrentMode === 'reduce') {
-    body.reduceSeconds = parseInt(document.getElementById('reduce-seconds').value) || 0;
+    const h = parseInt(document.getElementById('reduce-h').value) || 0;
+    const m = parseInt(document.getElementById('reduce-m').value) || 0;
+    const s = parseInt(document.getElementById('reduce-s').value) || 0;
+    body.reduceSeconds = h * 3600 + m * 60 + s;
   } else {
     body.activeSeconds = parseInt(document.getElementById('edit-seconds').value);
   }
@@ -1771,7 +1825,7 @@ async function saveEditService() {
     loadAdminServices();
   } catch { toast('❌ Error al modificar', 'error'); }
 }
-
+  
 async function cancelService() {
   const motivo = document.getElementById('edit-motivo').value.trim();
   if (!motivo) { toast('Debes indicar un motivo para anular', 'error'); return; }
