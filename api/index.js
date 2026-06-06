@@ -257,6 +257,13 @@ async function getMemberLevel(discordId) {
   return { level: highestLevel, rank: highestRank, roles: member.roles };
 }
 
+async function saveLog(db, { type, adminDiscordId, adminName, targetDiscordId, targetName, description }) {
+  await db.collection("logs").insertOne({
+    type, adminDiscordId, adminName, targetDiscordId, targetName, description,
+    createdAt: new Date(),
+  });
+}
+
 function buildNickname(rankName, firstName, plate, isMossoPractiques = false) {
   if (isMossoPractiques) {
     return `Mosso.P I ${firstName} I ${plate}`;
@@ -757,8 +764,22 @@ module.exports = async function handler(req, res) {
         ? `⚠️ Tu servicio del ${new Date(service.startTime).toLocaleDateString("es")} ha sido **anulado**.\n📝 Motivo: ${motivo}`
         : `ℹ️ Tu servicio del ${new Date(service.startTime).toLocaleDateString("es")} ha sido **modificado**.\n⏱️ Nuevo tiempo activo: ${formatSeconds(parseInt(finalActiveSeconds))}\n📝 Motivo: ${motivo}`;
 
-      try { await sendDiscordDM(service.discordId, msg); } catch {}
+     try { await sendDiscordDM(service.discordId, msg); } catch {}
 
+      const adminAgentLog = await db.collection("agents").findOne({ discordId: session.discordId });
+      const targetAgentLog = await db.collection("agents").findOne({ discordId: service.discordId });
+      await saveLog(db, {
+        type: cancelled ? 'service_cancel' : 'service_edit',
+        adminDiscordId: session.discordId,
+        adminName: adminAgentLog?.fullName || session.discordId,
+        targetDiscordId: service.discordId,
+        targetName: targetAgentLog?.fullName || service.discordId,
+        description: cancelled
+          ? `Servicio anulado. Motivo: ${motivo}`
+          : `Servicio editado — restados ${formatSeconds(body.reduceSeconds || 0)}. Nuevo activo: ${formatSeconds(parseInt(finalActiveSeconds))}. Motivo: ${motivo}`,
+      });
+
+      return res.status(200).json({ success: true, newActiveSeconds: finalActiveSeconds });
       return res.status(200).json({ success: true, newActiveSeconds: finalActiveSeconds });
     }
 
@@ -879,7 +900,7 @@ module.exports = async function handler(req, res) {
       try { await setDiscordNickname(targetDiscordId, nickname); } catch {}
 
       // Save promotion record
-      await db.collection("promotions").insertOne({
+  await db.collection("promotions").insertOne({
         targetDiscordId,
         adminDiscordId: session.discordId,
         oldRank: currentRank?.name || "—",
@@ -889,6 +910,15 @@ module.exports = async function handler(req, res) {
         createdAt: new Date(),
       });
 
+      await saveLog(db, {
+        type: 'promotion',
+        adminDiscordId: session.discordId,
+        adminName: adminAgent?.fullName || session.username,
+        targetDiscordId,
+        targetName: targetAgent.fullName,
+        description: `${tipo === 'ascenso' ? '⬆️ Ascenso' : '⬇️ Descenso'}: ${currentRank?.name || '—'} → ${newRank.name}. Motivo: ${motivo}`,
+      });
+      
       const isAscenso = tipo === "ascenso";
       const color = isAscenso ? 0x2da84a : 0xd94040;
       const image = isAscenso
@@ -963,6 +993,15 @@ module.exports = async function handler(req, res) {
 
       const result = await db.collection("sanciones").insertOne(sanction);
 
+      await saveLog(db, {
+        type: 'sanction',
+        adminDiscordId: session.discordId,
+        adminName: adminAgent?.fullName || session.username,
+        targetDiscordId,
+        targetName: targetAgent.fullName,
+        description: `Sanción ${sanctionNumber}/3 — ${ambito.toUpperCase()} — ${tipo}. Motivo: ${motivo}`,
+      });
+      
       // Handle roles
       const { roles: targetRoles } = await getMemberLevel(targetDiscordId);
       let roleAdded = null;
@@ -1068,8 +1107,17 @@ if (path === "/api/admin/service/pause" && req.method === "POST") {
     newStatus = "active";
     try { await sendDiscordDM(targetId, `▶ Tu servicio ha sido **reanudado** por un administrador.`); } catch {}
   }
-  return res.status(200).json({ success: true, status: newStatus });
-}
+const adminAgentLog = await db.collection("agents").findOne({ discordId: session.discordId });
+      const targetAgentLog = await db.collection("agents").findOne({ discordId: targetId });
+      await saveLog(db, {
+        type: 'service_pause',
+        adminDiscordId: session.discordId,
+        adminName: adminAgentLog?.fullName || session.discordId,
+        targetDiscordId: targetId,
+        targetName: targetAgentLog?.fullName || targetId,
+        description: `Servicio ${newStatus === 'paused' ? 'pausado' : 'reanudado'} por administrador`,
+      });
+      return res.status(200).json({ success: true, status: newStatus });
     
     return res.status(404).json({ error: "Not found" });
   } catch (err) {
