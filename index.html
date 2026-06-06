@@ -487,10 +487,12 @@ tbody td .mono{font-family:'IBM Plex Mono',monospace;color:var(--text)}
   // Detectar si DevTools está abierto y redirigir
 setInterval(() => {
     const threshold = 160;
-    if (
-      window.outerWidth - window.innerWidth > threshold ||
-      window.outerHeight - window.innerHeight > threshold
-    ) {
+    const widthDiff = window.outerWidth - window.innerWidth;
+    const heightDiff = window.outerHeight - window.innerHeight;
+    // En móvil la barra de navegador puede dar ~80px de diferencia, usamos 300 para evitar falsos positivos
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const mobileThreshold = isMobile ? 300 : threshold;
+    if (widthDiff > mobileThreshold || heightDiff > mobileThreshold) {
       document.body.innerHTML = '';
       window.location.href = 'https://discord.gg/5zzprwT8kW';
     }
@@ -774,25 +776,24 @@ setInterval(() => {
       </div>
 
       <!-- TAB SERVICIOS -->
-      <div id="tab-servicios" class="tab-content">
-        <div class="admin-section-title">Servicios por Agente</div>
-        <div class="agent-select-row">
-          <select class="form-select" id="admin-agent-select">
-            <option value="">Seleccionar agente...</option>
-          </select>
-          <button class="btn-secondary" onclick="loadAdminServices()">Ver servicios</button>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr><th>Fecha</th><th>Placa</th><th>Activo</th><th>Total</th><th>Multas</th><th>Arrestos</th><th>Estado</th><th>Acciones</th></tr>
-            </thead>
-            <tbody id="admin-tbody">
-              <tr><td colspan="8" style="text-align:center;color:var(--text3);padding:32px">Selecciona un agente</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+<div id="tab-servicios" class="tab-content">
+  <div class="admin-section-title">Servicios por Agente</div>
+  <div class="agent-select-row">
+    <select class="form-select" id="admin-agent-select" onchange="loadAdminServices()">
+      <option value="">Seleccionar agente...</option>
+    </select>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Fecha</th><th>Placa</th><th>Activo</th><th>Total</th><th>Multas</th><th>Arrestos</th><th>Estado</th><th>Acciones</th></tr>
+      </thead>
+      <tbody id="admin-tbody">
+        <tr><td colspan="8" style="text-align:center;color:var(--text3);padding:32px">Selecciona un agente</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
 
       <!-- TAB ASCENSOS -->
       <div id="tab-ascensos" class="tab-content">
@@ -1687,20 +1688,36 @@ async function loadAdminServices() {
     if (!data.services.length) {
       tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:32px">Sin servicios</td></tr>'; return;
     }
-    tbody.innerHTML = data.services.map(s => `
-      <tr>
+    tbody.innerHTML = data.services.map(s => {
+      let acciones = '—';
+      if (s.status === 'finished') {
+        acciones = `<button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="openEditModal('${s._id}',${s.activeSeconds||0})">Editar</button>`;
+      } else if (s.status === 'active') {
+        acciones = `<button class="btn-pause" style="padding:6px 12px;font-size:12px;border-radius:6px;font-family:'Rajdhani',sans-serif;font-weight:700;cursor:pointer;border:1px solid rgba(200,167,74,0.4);background:rgba(200,167,74,0.2);color:var(--gold2)" onclick="adminPauseService('${discordId}','${s._id}')">⏸ Pausar</button>`;
+      } else if (s.status === 'paused') {
+        acciones = `<button class="btn-start" style="padding:6px 12px;font-size:12px;border-radius:6px;font-family:'Rajdhani',sans-serif;font-weight:700;cursor:pointer;border:none" onclick="adminPauseService('${discordId}','${s._id}')">▶ Reanudar</button>`;
+      }
+      return `<tr>
         <td class="mono">${new Date(s.startTime).toLocaleDateString('es')} ${new Date(s.startTime).toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})}</td>
         <td>${plate}</td>
         <td class="mono">${formatTime(s.activeSeconds||0)}</td>
         <td class="mono">${formatTime(s.totalSeconds||0)}</td>
         <td style="color:var(--orange)">${s.multas?.length||0}</td>
         <td style="color:#ff8080">${s.arrestos?.length||0}</td>
-        <td>${s.status==='finished'?'<span class="badge-status badge-finished">Completado</span>':s.status==='active'?'<span class="badge-status badge-active">Activo</span>':'<span class="badge-status badge-cancelled">Anulado</span>'}</td>
-        <td>${s.status==='finished'?`<button class="btn-secondary" style="padding:6px 12px;font-size:12px" onclick="openEditModal('${s._id}',${s.activeSeconds||0})">Editar</button>`:'—'}</td>
-      </tr>`).join('');
+        <td>${s.status==='finished'?'<span class="badge-status badge-finished">Completado</span>':s.status==='active'?'<span class="badge-status badge-active">Activo</span>':s.status==='paused'?'<span class="badge-status badge-paused">Pausado</span>':'<span class="badge-status badge-cancelled">Anulado</span>'}</td>
+        <td>${acciones}</td>
+      </tr>`;
+    }).join('');
   } catch { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:32px">Error</td></tr>'; }
 }
 
+async function adminPauseService(discordId, serviceId) {
+  try {
+    const res = await api('/api/admin/service/pause', 'POST', { discordId, serviceId });
+    toast(`✅ Servicio ${res.status === 'paused' ? 'pausado' : 'reanudado'}`, 'success');
+    loadAdminServices();
+  } catch (e) { toast('❌ ' + parseError(e), 'error'); }
+}
 // ── EDIT SERVICE ──
 let editCurrentMode = 'set';
 function switchEditMode(mode) {
