@@ -1036,7 +1036,41 @@ module.exports = async function handler(req, res) {
 
       return res.status(200).json({ sanctions });
     }
-
+    // ── ADMIN: Pausar/Reanudar servicio de un agente ─────────────────────────
+if (path === "/api/admin/service/pause" && req.method === "POST") {
+  const token = req.headers.authorization?.replace("Bearer ", "");
+  const db = await getDb();
+  const session = await db.collection("sessions").findOne({ accessToken: token });
+  if (!session) return res.status(401).json({ error: "Unauthorized" });
+  const { level } = await getMemberLevel(session.discordId);
+  if (level < SUPERIOR_SCALE_MIN_LEVEL) return res.status(403).json({ error: "No autorizado" });
+  const body = req.body || (await parseBody(req));
+  const { discordId: targetId, serviceId } = body;
+  const service = await db.collection("services").findOne({ _id: new ObjectId(serviceId) });
+  if (!service) return res.status(404).json({ error: "Servicio no encontrado" });
+  const now = new Date();
+  let newStatus;
+  if (service.status === "active") {
+    await db.collection("services").updateOne(
+      { _id: new ObjectId(serviceId) },
+      { $set: { status: "paused", lastPauseStart: now }, $push: { pauses: { start: now, end: null } } }
+    );
+    newStatus = "paused";
+    try { await sendDiscordDM(targetId, `⏸ Tu servicio ha sido **pausado** por un administrador.`); } catch {}
+  } else {
+    const pauseDuration = Math.floor((now - new Date(service.lastPauseStart)) / 1000);
+    const pauses = service.pauses;
+    pauses[pauses.length - 1].end = now;
+    await db.collection("services").updateOne(
+      { _id: new ObjectId(serviceId) },
+      { $set: { status: "active", lastPauseStart: null, pauses }, $inc: { pauseSeconds: pauseDuration } }
+    );
+    newStatus = "active";
+    try { await sendDiscordDM(targetId, `▶ Tu servicio ha sido **reanudado** por un administrador.`); } catch {}
+  }
+  return res.status(200).json({ success: true, status: newStatus });
+}
+    
     return res.status(404).json({ error: "Not found" });
   } catch (err) {
     console.error(err);
