@@ -424,37 +424,6 @@ module.exports = async function handler(req, res) {
       );
 
       try { await setDiscordNickname(session.discordId, nickname); } catch {}
-
-      if (isNewPlate) {
-        const mainEmbed = {
-          color: 0x1a3a6b,
-          title: "📋 NUEVA PLACA ASIGNADA",
-          fields: [
-            { name: "Usuario", value: `<@${session.discordId}> \`${session.username}\``, inline: true },
-            { name: "Placa", value: `**${plate}**`, inline: true },
-          ],
-          thumbnail: { url: robloxData.url },
-          timestamp: new Date().toISOString(),
-        };
-        const infoEmbed = {
-          color: 0x1a3a6b,
-          title: "¿Qué es el TIP y cuando te lo pueden solicitar?",
-          description:
-            "La identificación policial es la forma en que un agente acredita oficialmente que pertenece a las Fuerzas y Cuerpos de Seguridad...",
-          image: {
-            url: "https://media.discordapp.net/attachments/1495910520182673559/1512423936900599908/image.png?ex=6a240a0e&is=6a22b88e&hm=2513dc0fed668f5d6b357f593b71252e49a3ea4d641feb795ffadce59dfdf8f9&=&format=webp&quality=lossless",
-          },
-        };
-        const msg = await sendDiscordEmbed(PLATES_CHANNEL_ID, [mainEmbed, infoEmbed]);
-        await db.collection("agents").updateOne(
-          { discordId: session.discordId },
-          { $set: { plateMessageId: msg.id } }
-        );
-      }
-
-      return res.status(200).json({ success: true, plate, agent: agentData });
-    }
-
     // ── FICHAJE: Iniciar servicio ────────────────────────────────────────────
     if (path === "/api/service/start" && req.method === "POST") {
       const token = req.headers.authorization?.replace("Bearer ", "");
