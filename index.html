@@ -466,44 +466,7 @@ tbody td .mono{font-family:'IBM Plex Mono',monospace;color:var(--text)}
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8829201956559975"
      crossorigin="anonymous"></script>
 </head>
-<script>
-// ── ANTI-DEVTOOLS ──
-(function() {
-  // Bloquear click derecho
-  // ✅ Excluye inputs y textareas
-document.addEventListener('contextmenu', e => {
-  const tag = e.target.tagName;
-  if (tag === 'INPUT' || tag === 'TEXTAREA' || e.target.isContentEditable) return;
-  e.preventDefault();
-});
 
-  // Bloquear atajos de teclado
-  document.addEventListener('keydown', e => {
-    if (
-      e.key === 'F12' ||
-      (e.ctrlKey && e.shiftKey && ['I','J','C','U'].includes(e.key.toUpperCase())) ||
-      (e.ctrlKey && e.key.toUpperCase() === 'U') ||
-      (e.metaKey && e.altKey && ['I','J','C'].includes(e.key.toUpperCase()))
-    ) {
-      e.preventDefault();
-      e.stopPropagation();
-      return false;
-    }
-  });
-
-  // Detectar si DevTools está abierto y redirigir
-setInterval(() => {
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  if (isMobile) return; // En móvil no hacer nada
-  const widthDiff = window.outerWidth - window.innerWidth;
-  const heightDiff = window.outerHeight - window.innerHeight;
-  if (widthDiff > 160 || heightDiff > 160) {
-    document.body.innerHTML = '';
-    window.location.href = 'https://discord.gg/5zzprwT8kW';
-  }
-}, 1000);
-})();
-</script>
 <body>
 <div id="app">
 
